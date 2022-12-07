@@ -6,10 +6,10 @@ Written in node.js and mongodb, PUTinCoin Explorer (based on eIquidus) is the mo
 
 ### Premium Support
 
-All code in this project is open source and available free-of-charge under the BSD-3-Clause license. If you require assistance setting up an explorer for your coin, or are interested in hiring a developer to incorporate custom changes for your explorer, you may contact the developer using the links below:
+All code in this project is open source and available free-of-charge under the BSD-3-Clause license. If you require assistance setting up an explorer for your coin, or are interested in hiring a developer to incorporate custom changes for your explorer, you may contact the developer using the link below:
 
 <div align="center">
-<a href="mailto:support@putincoin.org"><strong>mailto:support@putincoin.org</strong></a>
+<a href="mailto:support@putincoin.org"><strong>support@putincoin.org</strong></a>
 </div>
 
 Table of Contents

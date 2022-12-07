@@ -251,7 +251,7 @@ Select database:
 use explorerdb
 ```
 
-Create a new user with read/write access:
+Create a new user with read/write access (also this has to be the same in `settings.json`):
 
 ```
 db.createUser( { user: "dbuseryoulike", pwd: "dbpasswordyoulike", roles: [ "readWrite" ] } )

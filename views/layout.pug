@@ -1,0 +1,856 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1')
+    meta(http-equiv='Content-Language', content='en')
+    title=(page_title_prefix == null || page_title_prefix == '' ? settings.locale.error_title.replace('{1}', settings.coin.name) : page_title_prefix) + ' - ' + settings.shared_pages.page_title
+    if settings.shared_pages.favicons.favicon32 != ''
+      link(rel='icon', href='/' + settings.shared_pages.favicons.favicon32, sizes='32x32')
+    if settings.shared_pages.favicons.favicon128 != ''
+      link(rel='icon', href='/' + settings.shared_pages.favicons.favicon128, sizes='128x128')
+    if settings.shared_pages.favicons.favicon180 != ''
+      link(rel='icon', href='/' + settings.shared_pages.favicons.favicon180, sizes='180x180')
+    if settings.shared_pages.favicons.favicon192 != ''
+      link(rel='icon', href='/' + settings.shared_pages.favicons.favicon192, sizes='192x192')
+    link(rel='stylesheet', href='/css/themes/' + settings.shared_pages.theme.toLowerCase() + '/bootstrap.min.css' + (themeHash == null ? '' : '?h=' + themeHash))
+    link(rel='stylesheet', href='https://use.fontawesome.com/releases/v5.15.4/css/all.css')
+    if active == 'markets' || active == 'richlist'
+      link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.min.css')
+    if active == 'network'
+      link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.4/css/flag-icons.min.css')
+    link(rel='stylesheet', type='text/css', href='https://cdn.datatables.net/v/bs5/dt-1.11.3/datatables.min.css')
+    link(rel='stylesheet', href='/css/style.min.css' + (styleHash == null ? '' : '?h=' + styleHash))
+    link(rel='stylesheet', href='/css/custom.min.css' + (customHash == null ? '' : '?h=' + customHash))
+    script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js', integrity='sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==', crossorigin='anonymous', referrerpolicy='no-referrer')
+    script(type='text/javascript', src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js', integrity='sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p', crossorigin='anonymous')
+    if active == 'markets' || active == 'richlist'
+      script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.min.js')
+    if active == 'markets'
+      script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.dateAxisRenderer.min.js')
+      script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.ohlcRenderer.min.js')
+      script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.highlighter.min.js')
+    if active == 'richlist'
+      script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/plugins/jqplot.pieRenderer.min.js')
+    script(type='text/javascript', src='https://cdn.datatables.net/v/bs5/dt-1.11.3/datatables.min.js')
+    - var showPanels = false
+    - var showNethashChart = false
+    - var showDifficultyChart = false
+    case active
+      when 'home'
+        if settings.index_page.show_panels == true
+          - showPanels = true
+        if settings.index_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.index_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'block'
+        if settings.block_page.show_panels == true
+          - showPanels = true
+        if settings.block_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.block_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'tx'
+        if settings.transaction_page.show_panels == true
+          - showPanels = true
+        if settings.transaction_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.transaction_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'address'
+        if settings.address_page.show_panels == true
+          - showPanels = true
+        if settings.address_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.address_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'masternodes'
+        if settings.masternodes_page.show_panels == true
+          - showPanels = true
+        if settings.masternodes_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.masternodes_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'movement'
+        if settings.movement_page.show_panels == true
+          - showPanels = true
+        if settings.movement_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.movement_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'network'
+        if settings.network_page.show_panels == true
+          - showPanels = true
+        if settings.network_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.network_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'richlist'
+        if settings.richlist_page.show_panels == true
+          - showPanels = true
+        if settings.richlist_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.richlist_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'markets'
+        if settings.markets_page.show_panels == true
+          - showPanels = true
+        if settings.markets_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.markets_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'info'
+        if settings.api_page.show_panels == true
+          - showPanels = true
+        if settings.api_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.api_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'claim-address'
+        if settings.claim_address_page.show_panels == true
+          - showPanels = true
+        if settings.claim_address_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.claim_address_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      when 'reward'
+        if settings.blockchain_specific.heavycoin.reward_page.show_panels == true
+          - showPanels = true
+        if settings.blockchain_specific.heavycoin.reward_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.blockchain_specific.heavycoin.reward_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+      default
+        if settings.error_page.show_panels == true
+          - showPanels = true
+        if settings.error_page.show_nethash_chart == true
+          - showNethashChart = true
+        if settings.error_page.show_difficulty_chart == true
+          - showDifficultyChart = true
+    if active == 'reward' || (settings.network_history.enabled == true && ((showNethashChart == true && settings.shared_pages.page_header.network_charts.nethash_chart.enabled == true && settings.shared_pages.show_hashrate == true) || (showDifficultyChart == true && settings.shared_pages.page_header.network_charts.difficulty_chart.enabled == true)))
+      script(type='text/javascript', src='https://cdn.jsdelivr.net/npm/chart.js@3.6.1/dist/chart.min.js')
+    if settings.network_history.enabled == true && ((showNethashChart == true && settings.shared_pages.page_header.network_charts.nethash_chart.enabled == true && settings.shared_pages.show_hashrate == true) || (showDifficultyChart == true && settings.shared_pages.page_header.network_charts.difficulty_chart.enabled == true))
+      script(type='text/javascript', src='https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.2.0')
+    script.
+      /* Special thanks to the stackoverflow community for the getParameterByName function: https://stackoverflow.com/a/901144/3038650 */
+      function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+      }
+      function fixFooterHeightAndPosition() {
+        var screenWidth = $(window).width();
+
+        if (screenWidth <= 575) {
+          // Mobile
+          $('#footer-container').css('height', '!{settings.shared_pages.page_footer.footer_height_mobile}');
+        } else if (screenWidth >= 576 && screenWidth <= 991) {
+          // Tablet
+          $('#footer-container').css('height', '!{settings.shared_pages.page_footer.footer_height_tablet}');
+        } else {
+          // Desktop
+          $('#footer-container').css('height', '!{settings.shared_pages.page_footer.footer_height_desktop}');
+        }
+
+        if (!#{settings.shared_pages.page_footer.sticky_footer}) {
+          // Wait a tick before fixing footer position to give time for elements to be rendered
+          var nonStickyFooterSetIntervalID = setInterval(function() {
+            // Stop setInterval from running again
+            clearInterval(nonStickyFooterSetIntervalID);
+            // Ensure footer is shown at the bottom of the viewport
+            var offset = (window.innerHeight - $('#footer-container').position().top - $('#footer-container').outerHeight());
+            $('#footer-container').css('margin-top', (offset > 0 ? offset - 1 : '10') + 'px');
+          }, 1, "tmrFixFooter");
+        } else {
+          // Add spacing to the bottom of the body for the sticky footer
+          $('body').css('margin-bottom', ($('#footer-container').outerHeight() + 10) + 'px');
+        }
+
+        fixSocialLinkFontSize();
+      }
+      function fixSocialLinkFontSize() {
+        var fontSize = $('#footer-container').height() * (getSocialLinkHeight() / 100);
+        $('#footer-container .social-link').css('font-size', fontSize);
+        $('#footer-container .social-link > img').css('width', fontSize + 'px').css('height', fontSize + 'px');
+      }
+      function getSocialLinkHeight() {
+        var retVal = 70;
+        var screenWidth = $(window).width();
+
+        if (screenWidth <= 575) {
+          // Mobile
+          retVal = !{settings.shared_pages.page_footer.social_link_percent_height_mobile};
+        } else if (screenWidth >= 576 && screenWidth <= 991) {
+          // Tablet
+          retVal = !{settings.shared_pages.page_footer.social_link_percent_height_tablet};
+        } else {
+          // Desktop
+          retVal = !{settings.shared_pages.page_footer.social_link_percent_height_desktop};
+        }
+
+        return retVal;
+      }
+      function enableTooltips() {
+        if ($().tooltip) {
+          // Enable tooltips only if browser supports them
+          $('[data-bs-toggle="tooltip"]').tooltip();
+        }
+      }
+      function fixDataTableColumns() {
+        // Wait 2 ticks before adjusting table columns to give time for elements to be rendered (1 tick doesn't seem to be enough for some tables)
+        var ColumnAdjustSetIntervalID = setInterval(function() {
+          // Stop setInterval from running again
+          clearInterval(ColumnAdjustSetIntervalID);
+          // Ensure columns are properly aligned
+          $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        }, 2, 'adjustTableColumns');
+      }
+      function rotateElement(elementSelector) {
+        var element = $(elementSelector);
+
+        if (element.length > 0) {
+          $({ deg: 0 }).animate({ deg: 360 }, {
+            duration: 2000,
+            step: function(deg) {
+              element.css({
+                transform: 'rotateY(' + deg + 'deg)'
+              });
+            },
+            done: function() {
+              setTimeout(function() {
+                rotateElement(elementSelector);
+              }, 1500);
+            }
+          });
+        }
+      }
+      function startRotateElement(elementSelector) {
+        setTimeout(function() {
+          rotateElement(elementSelector);
+        }, 100);
+      }
+      function getNetHashUnits() {
+        var networkSuffix='';
+        switch ('#{settings.shared_pages.page_header.panels.network_panel.nethash_units}') {
+          case "K":
+            networkSuffix='(KH/s)';
+            break;
+          case "M":
+            networkSuffix='(MH/s)';
+            break;
+          case "G":
+            networkSuffix='(GH/s)';
+            break;
+          case "T":
+            networkSuffix='(TH/s)';
+            break;
+          case "P":
+            networkSuffix='(PH/s)';
+            break;
+          case "H":
+            networkSuffix='(H/s)';
+            break;
+        }
+        return networkSuffix;
+      }
+      $(document).ready(function() {
+        if ('#{active}' != '')
+          $('##{active} > a.nav-link').addClass('active');
+        function showTopPanelData(dataElement, loadingElement) {
+          if ($('#' + loadingElement).length) {
+            $('#' + loadingElement).fadeOut('slow', function() {
+              $('#' + loadingElement).remove();
+              $('#' + dataElement).fadeIn();
+            });
+          }
+        }
+        function update_stats() {
+          var summary_headers = {
+            Accept: 'application/json, text/javascript, */*; q=0.01'
+          };
+
+          if (#{showPanels} == false)
+            summary_headers['footer-only'] = 'true';
+
+          $.ajax({url: '/ext/getsummary', headers: summary_headers, success: function(json) {
+            if (#{showPanels} == true) {
+              if (json.masternodeCountOnline == null)
+                json.masternodeCountOnline = '-';
+              if (json.masternodeCountOffline == null)
+                json.masternodeCountOffline = '-';
+
+              var mnOnlineText = json.masternodeCountOnline+" node"+(json.masternodeCountOnline == 1 ? "" : "s")+" online";
+              var mnOfflineText = json.masternodeCountOffline+" unreachable node"+(json.masternodeCountOffline == 1 ? "" : "s");
+
+              $("#masternodeCountOnline").text(json.masternodeCountOnline).prop("alt", mnOnlineText).prop("title", mnOnlineText).attr("data-bs-original-title", mnOnlineText);
+              $("#masternodeCountOffline").text(json.masternodeCountOffline).prop("alt", mnOfflineText).prop("title", mnOfflineText).attr("data-bs-original-title", mnOfflineText);
+              $("#spnMasternodeCountOnline").prop("alt", mnOnlineText).prop("title", mnOnlineText).attr("data-bs-original-title", mnOnlineText);
+              $("#spnMasternodeCountOffline").prop("alt", mnOfflineText).prop("title", mnOfflineText).attr("data-bs-original-title", mnOfflineText);
+              showTopPanelData('masternodepanel', 'masternodePanelLoading');
+
+              var supplyString = json.supply;
+              var diffString = json.difficulty;
+              var hashrateString = json.hashrate;
+              var splitValue, splitParts;
+
+              if (!isNaN(json.difficulty))
+                diffString = Number(json.difficulty).toLocaleString('en',{'minimumFractionDigits':2,'maximumFractionDigits':8,'useGrouping':true});
+              if (!isNaN(json.supply))
+                supplyString = parseInt(parseFloat(json.supply).toFixed(0)).toLocaleString('en');
+              if (!isNaN(json.hashrate))
+                hashrateString = Number(json.hashrate).toLocaleString('en',{'minimumFractionDigits':2,'maximumFractionDigits':8,'useGrouping':true});
+
+              $("#supply").text(supplyString);
+              splitValue = Number(parseFloat(json.lastPrice).toFixed(8) * parseInt(parseFloat(json.supply).toFixed(0))).toLocaleString('en',{'minimumFractionDigits':2,'maximumFractionDigits':8,'useGrouping':true});
+              splitParts = splitValue.split('.');
+              showTopPanelData('supplypanel', 'supplyPanelLoading');
+
+              $("#marketCap").html(splitParts[0] + '.<span class="decimal">' + splitParts[1] + '</span>');
+              showTopPanelData('marketCapPanel', 'marketCapPanelLoading');
+
+              splitParts = diffString.split('.');
+              $("#difficulty").html(splitParts[0] + '.<span class="decimal">' + splitParts[1] + '</span>');
+
+              if (json.difficultyHybrid == null || json.difficultyHybrid == '')
+                $("#difficultyHybrid").html('-');
+              else {
+                splitParts = json.difficultyHybrid.split('.');
+                $("#difficultyHybrid").html(splitParts[0] + '.<span class="decimal">' + splitParts[1] + '</span>');
+              }
+
+              showTopPanelData('difficultypanel', 'difficultyPanelLoading');
+
+              if (hashrateString == null || hashrateString == '' || hashrateString == '-')
+                $("#hashrate").html('-');
+              else {
+                splitParts = hashrateString.split('.');
+                $("#hashrate").html(splitParts[0] + '.<span class="decimal">' + splitParts[1] + '</span>');
+              }
+              showTopPanelData('hashratepanel', 'hashratePanelLoading');
+
+              splitValue = Number(json.lastPrice).toLocaleString('en',{'minimumFractionDigits':2,'maximumFractionDigits':8,'useGrouping':true});
+              splitParts = splitValue.split('.');
+              $("#lastPrice").html(splitParts[0] + '.<span class="decimal">' + splitParts[1] + '</span>');
+              showTopPanelData('pricepanel', 'pricePanelLoading');
+            }
+
+            $("#lblConnections").text(json.connections + ' connections');
+            $("#lblBlockcount").text(json.blockcount + ' blocks');
+          }});
+        }
+        var nethashChart;
+        var difficultyChart;
+        function update_network_charts() {
+          $.ajax({
+            url: '/ext/getnetworkchartdata',
+            success: function(result) {
+              if (#{settings.network_history.enabled} == true && #{showNethashChart} == true && #{settings.shared_pages.page_header.network_charts.nethash_chart.enabled} == true && #{settings.shared_pages.show_hashrate} == true) {
+                const ctxNethash = document.getElementById('nethashChart').getContext('2d');
+
+                if (nethashChart == null) {
+                  nethashChart = new Chart(ctxNethash, {
+                    type: 'line',
+                    data: {
+                      labels: result.map(function(a) {return a.blockindex;}),
+                      datasets: [
+                        {
+                          label: 'Hashrate',
+                          data: result.map(function(a) {return a.nethash;}),
+                          backgroundColor: ['#{settings.shared_pages.page_header.network_charts.nethash_chart.fill_color}'],
+                          borderColor: ['#{settings.shared_pages.page_header.network_charts.nethash_chart.line_color}'],
+                          fill: 'start'
+                        }
+                      ]
+                    },
+                    options: {
+                      maintainAspectRatio: false,
+                      elements: {
+                        point: {
+                          radius: 1
+                        },
+                        line: {
+                          tension: 0.1
+                        }
+                      },
+                      scales: {
+                        yAxis: {
+                          title: {
+                            display: true,
+                            text: 'Network ' + getNetHashUnits(),
+                            font: {
+                              weight: 'bold'
+                            }
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: {
+                          display: true,
+                          position: 'bottom'
+                        },
+                        title: {
+                          display: false
+                        },
+                        tooltip: {
+                          mode: 'index',
+                          intersect: false,
+                          displayColors: true,
+                          callbacks: {
+                            title: function(context) {
+                              return 'Block ' + context[0].label + ' Hashrate';
+                            },
+                            label: function(context) {
+                              return context.formattedValue + ' ' + getNetHashUnits()
+                            }
+                          }
+                        },
+                        crosshair: {
+                          line: {
+                            color: '#{settings.shared_pages.page_header.network_charts.nethash_chart.crosshair_color}',
+                            width: 1
+                          },
+                          sync: {
+                            enabled: false
+                          },
+                          zoom: {
+                            enabled: false
+                          }
+                        }
+                      }
+                    }
+                  });
+                  $('#nethashChartParent').fadeIn();
+                } else {
+                  nethashChart.data.labels = result.map(function(a) {return a.blockindex;});
+                  nethashChart.data.datasets[0].data = result.map(function(a) {return a.nethash;});
+                  nethashChart.update();
+                }
+              }
+
+              if (#{settings.network_history.enabled} == true && #{showDifficultyChart} == true && #{settings.shared_pages.page_header.network_charts.difficulty_chart.enabled} == true) {
+                const ctxDifficulty = document.getElementById('difficultyChart').getContext('2d');
+
+                var diffDataSets = [];
+                var showPOW = false;
+                var showPOS = false;
+
+                for (var i = 0; i < result.length; i++) {
+                  if (result[i].difficulty_pow != 0)
+                    showPOW = true;
+                  if (result[i].difficulty_pos != 0)
+                    showPOS = true;
+                }
+
+                if (showPOS) {
+                  diffDataSets.push({
+                    label: 'POS Difficulty',
+                    data: result.map(function(a) {return a.difficulty_pos;}),
+                    backgroundColor: ['#{settings.shared_pages.page_header.network_charts.difficulty_chart.pos_fill_color}'],
+                    borderColor: ['#{settings.shared_pages.page_header.network_charts.difficulty_chart.pos_line_color}'],
+                    fill: 'start'
+                  });
+                }
+
+                if (showPOW || !showPOS) {
+                  diffDataSets.push({
+                    label: 'POW Difficulty',
+                    data: result.map(function(a) {return a.difficulty_pow;}),
+                    backgroundColor: ['#{settings.shared_pages.page_header.network_charts.difficulty_chart.pow_fill_color}'],
+                    borderColor: ['#{settings.shared_pages.page_header.network_charts.difficulty_chart.pow_line_color}'],
+                    fill: 'start'
+                  });
+                }
+
+                if (difficultyChart == null) {
+                  difficultyChart = new Chart(ctxDifficulty, {
+                    type: 'line',
+                    data: {
+                      labels: result.map(function(a) {return a.blockindex;}),
+                      datasets: diffDataSets
+                    },
+                    options: {
+                      maintainAspectRatio: false,
+                      elements: {
+                        point: {
+                          radius: 1
+                        },
+                        line: {
+                          tension: 0.1
+                        }
+                      },
+                      scales: {
+                        yAxis: {
+                          title: {
+                            display: true,
+                            text: 'Difficulty',
+                            font: {
+                              weight: 'bold'
+                            }
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: {
+                          display: true,
+                          position: 'bottom'
+                        },
+                        title: {
+                          display: false
+                        },
+                        tooltip: {
+                          mode: 'index',
+                          intersect: false,
+                          displayColors: true,
+                          callbacks: {
+                            title: function(context) {
+                              return 'Block ' + context[0].label + ' Difficulty';
+                            },
+                            label: function(context) {
+                              return context.formattedValue;
+                            }
+                          }
+                        },
+                        crosshair: {
+                          line: {
+                            color: '#{settings.shared_pages.page_header.network_charts.difficulty_chart.crosshair_color}',
+                            width: 1
+                          },
+                          sync: {
+                            enabled: false
+                          },
+                          zoom: {
+                            enabled: false
+                          }
+                        }
+                      }
+                    }
+                  });
+                  $('#difficultyChartParent').fadeIn();
+                } else {
+                  difficultyChart.data.labels = result.map(function(a) {return a.blockindex;});
+
+                  if (difficultyChart.data.datasets.length != diffDataSets.length)
+                    difficultyChart.data.datasets = diffDataSets;
+                  else {
+                    if (
+                      (
+                        difficultyChart.data.datasets[0].label.indexOf('POW') > -1 &&
+                        diffDataSets[0].label.indexOf('POW') > -1
+                      )
+                      ||
+                      (
+                        difficultyChart.data.datasets[0].label.indexOf('POS') > -1 &&
+                        diffDataSets[0].label.indexOf('POS') > -1
+                      )
+                    ) {
+                      difficultyChart.data.datasets[0].data = diffDataSets[0].data;
+
+                      if (difficultyChart.data.datasets.length == 2)
+                        difficultyChart.data.datasets[1].data = diffDataSets[1].data;
+                    } else
+                      difficultyChart.data.datasets = diffDataSets;
+                  }
+
+                  difficultyChart.update();
+                }
+              }
+            }
+          });
+        }
+        $(window).resize(function () {
+          fixDataTableColumns();
+          fixFooterHeightAndPosition();
+        });
+        function getNetworkPanel() {
+          var hashRateType='<label id="hashrate"></label>';
+          return '<div class="card-header"><strong>#{settings.locale.network} <span class="small fw-normal">'+getNetHashUnits()+'</span></strong></div><div class="card-body"><div id="hashratePanelLoading" class="header-panel"><i class="fa fa-spinner fa-pulse"></i></div><div id="hashratepanel" class="header-panel" style="display:none;"><span class="fa fa-cogs"></span>'+hashRateType+'</div></div>';
+        }
+        function getDifficultyPanel() {
+          var difficultyType='<label id="difficulty"></label>';
+          if ('#{settings.shared_pages.difficulty}' == 'Hybrid') difficultyType+='<br /><span class="fas fa-sliders-h"></span><label id="difficultyHybrid"></label>';
+          return '<div class="card-header"><strong>#{settings.locale.difficulty}</strong></div><div class="card-body"><div id="difficultyPanelLoading" class="header-panel"><i class="fa fa-spinner fa-pulse"></i></div><div id="difficultypanel" class="header-panel" style="display:none;"><span class="fas fa-sliders-h"></span>'+difficultyType+'</div></div>';
+        }
+        function getMasternodesPanel() {
+          return '<div class="card-header"><strong>#{settings.locale.masternodecount}</strong></div><div class="card-body"><div id="masternodePanelLoading" class="header-panel"><i class="fa fa-spinner fa-pulse"></i></div><div id="masternodepanel" class="header-panel" style="display:none;"><span id="spnMasternodeCountOnline" class="fa fa-check-circle" data-bs-toggle="tooltip" data-bs-placement="top"></span><label id="masternodeCountOnline" data-bs-toggle="tooltip" data-bs-placement="top"></label><label>&nbsp;/&nbsp;</label><label id="masternodeCountOffline" data-bs-toggle="tooltip" data-bs-placement="top"></label><span id="spnMasternodeCountOffline" class="fa fa-exclamation-triangle" data-bs-toggle="tooltip" data-bs-placement="top"></span></div></div>';
+        }
+        function getCoinSupplyPanel() {
+          var supplyType='<label id="supply"></label>';
+          return '<div class="card-header"><strong>#{settings.locale.ex_supply} <span class="small fw-normal">(#{settings.coin.symbol})</span></strong></div><div class="card-body"><div id="supplyPanelLoading" class="header-panel"><i class="fa fa-spinner fa-pulse"></i></div><div id="supplypanel" class="header-panel" style="display:none;"><span class="fa fa-chart-pie"></span>'+supplyType+'</div></div>';
+        }
+        function getPricePanel() {
+          var priceType='<label id="lastPrice">-</label>';
+          return '<div class="card-header"><strong>Price <span class="small fw-normal">(#{settings.markets_page.default_exchange.trading_pair.split('/')[1]})</span></strong></div><div class="card-body"><div id="pricePanelLoading" class="header-panel"><i class="fa fa-spinner fa-pulse"></i></div><div id="pricepanel" class="header-panel" style="display:none;"><span class="fa fa-rocket"></span>'+priceType+'</div></div>';
+        }
+        function getMarketCapPanel() {
+          return '<div class="card-header"><strong>Market Cap <span class="small fw-normal">(#{settings.markets_page.default_exchange.trading_pair.split('/')[1]})</span></strong></div><div class="card-body"><div id="marketCapPanelLoading" class="header-panel"><i class="fa fa-spinner fa-pulse"></i></div><div id="marketCapPanel" class="header-panel" style="display:none;"><span class="fas fa-chart-line"></span><label id="marketCap"></label></div></div>';
+        }
+        function getLogoPanel() {
+          return '<img src="#{settings.shared_pages.logo}" style="margin-top:-15px;height:128px;" alt="#{settings.coin.name} Logo" title="#{settings.coin.name} Logo" />';
+        }
+        function getActivePanel(panelName) {
+          var sReturn='';
+          switch (panelName) {
+            case "network_panel":
+              sReturn=getNetworkPanel();
+              break;
+            case "difficulty_panel":
+              sReturn=getDifficultyPanel();
+              break;
+            case "masternodes_panel":
+              sReturn=getMasternodesPanel();
+              break;
+            case "coin_supply_panel":
+              sReturn=getCoinSupplyPanel();
+              break;
+            case "price_panel":
+              sReturn=getPricePanel();
+              break;
+            case "market_cap_panel":
+              sReturn=getMarketCapPanel();
+              break;
+            case "logo_panel":
+              sReturn=getLogoPanel();
+              break;
+          }
+          return sReturn;
+        }
+        function hideShowPanel(panelID, panelName) {
+          var oPanel = document.getElementById(panelName);
+          if (typeof(oPanel) != 'undefined' && oPanel != null) {
+            document.getElementById(panelName).innerHTML=getActivePanel(panelID);
+
+            if (panelID == 'logo_panel') {
+              // Remove css classes from logo panel
+              $(oPanel).removeClass();
+            }
+          }
+        }
+        $(document).on('click', 'button.btn-close', function (e) {
+          e.preventDefault();
+
+          $('.alert-dismissible').on('closed.bs.alert', function (e) {
+            e.preventDefault();
+            fixFooterHeightAndPosition();
+          });
+        });
+        if (#{showPanels} == true) {
+          hideShowPanel('#{settings.panel1}', 'pnlOne');
+          hideShowPanel('#{settings.panel2}', 'pnlTwo');
+          hideShowPanel('#{settings.panel3}', 'pnlThree');
+          hideShowPanel('#{settings.panel4}', 'pnlFour');
+          hideShowPanel('#{settings.panel5}', 'pnlFive');
+        }
+        setInterval(function() {
+          update_stats();
+        }, 60000);
+        if (#{settings.network_history.enabled} == true && ((#{showNethashChart} == true && #{settings.shared_pages.page_header.network_charts.nethash_chart.enabled} == true && #{settings.shared_pages.show_hashrate} == true) || (#{showDifficultyChart} == true && #{settings.shared_pages.page_header.network_charts.difficulty_chart.enabled} == true))) {
+          var setting_reload_chart_seconds = #{settings.shared_pages.page_header.network_charts.reload_chart_seconds};
+          if (setting_reload_chart_seconds > 0) {
+            setInterval(function() {
+              update_network_charts();
+            }, (setting_reload_chart_seconds * 1000));
+          }
+          update_network_charts();
+        }
+        update_stats();
+        fixFooterHeightAndPosition();
+        enableTooltips();
+      });
+  body
+    - var headerClasses = [];
+    - var footerClasses = ['nav','navbar','navbar-default','d-flex','footer'];
+    if settings.shared_pages.page_header.sticky_header == true
+      - headerClasses.push('fixed-top');
+    if settings.shared_pages.page_footer.sticky_footer == true
+      - footerClasses.push('fixed-bottom');
+    if settings.shared_pages.page_header.bgcolor != null && settings.shared_pages.page_header.bgcolor != ''
+      - headerClasses.push('bg-' + settings.shared_pages.page_header.bgcolor);
+      if settings.shared_pages.page_header.bgcolor.toString().toLowerCase() == 'dark' || settings.shared_pages.page_header.bgcolor.toString().toLowerCase() == 'light'
+        - headerClasses.push('navbar-' + settings.shared_pages.page_header.bgcolor);
+    else
+      - headerClasses.push('bg-primary');
+      - headerClasses.push('navbar-dark');
+    if settings.shared_pages.page_footer.bgcolor != null && settings.shared_pages.page_footer.bgcolor != ''
+      - footerClasses.push('bg-' + settings.shared_pages.page_footer.bgcolor);
+      if settings.shared_pages.page_footer.bgcolor.toString().toLowerCase() == 'dark' || settings.shared_pages.page_footer.bgcolor.toString().toLowerCase() == 'light'
+        - footerClasses.push('navbar-' + settings.shared_pages.page_footer.bgcolor);
+    else
+      - footerClasses.push('bg-primary');
+      - footerClasses.push('navbar-dark');
+    div#main-header.navbar(class=headerClasses)
+      div.navbar.navbar-expand-lg(style=settings.shared_pages.page_header.home_link == 'logo' ? 'padding-left:0;' : '')
+        div.container
+          .navbar-header
+            button.navbar-toggler(type='button', data-bs-toggle='collapse', data-bs-target='#navbar-collapse', aria-controls='navbar-collapse', aria-expanded='false', aria-label='Toggle navigation')
+              span.navbar-toggler-icon
+          if settings.shared_pages.page_header.home_link == 'title'
+            a.navbar-brand(href='/', style='order:-1;') #{settings.shared_pages.page_title}
+          else if settings.shared_pages.page_header.home_link == 'coin'
+            a.navbar-brand(href='/', style='order:-1;') #{settings.coin.name}
+          else if settings.shared_pages.page_header.home_link == 'logo'
+            a(href='/', alt=settings.coin.name + ' Home', title=settings.coin.name + ' Home', style='order:-1;', data-bs-toggle='tooltip', data-bs-placement='bottom')
+              img.logo-main(src=(settings.shared_pages.page_header.home_link_logo == null || settings.shared_pages.page_header.home_link_logo == '' ? settings.shared_pages.logo : settings.shared_pages.page_header.home_link_logo), style='margin:0;max-height:' + settings.shared_pages.page_header.home_link_logo_height + 'px;')
+          .collapse.navbar-collapse(id='navbar-collapse')
+            ul.navbar-nav(style='width:100%;')
+              li#home.nav-item
+                a.nav-link(href='/')
+                  span.fas.fa-cubes
+                  span.margin-left-5 #{settings.locale.menu_explorer}
+              if settings.blockchain_specific.heavycoin.enabled == true && settings.blockchain_specific.heavycoin.reward_page.enabled == true
+                li#reward.nav-item
+                  a.nav-link(href='/reward')
+                    span.fa.fa-star
+                    span.margin-left-5 #{settings.locale.menu_reward}
+              if settings.masternodes_page.enabled == true
+                li#masternodes.nav-item
+                  a.nav-link(href='/masternodes')
+                    span.fa.fa-share-alt
+                    span.margin-left-5 Masternodes
+              if settings.movement_page.enabled == true
+                li#movement.nav-item
+                  a.nav-link(href='/movement')
+                    span.far.fa-money-bill-alt
+                    span.margin-left-5 #{settings.locale.menu_movement}
+              if settings.network_page.enabled == true
+                li#network.nav-item
+                  a.nav-link(href='/network')
+                    span.fas.fa-network-wired
+                    span.margin-left-5 #{settings.locale.menu_network}
+              if settings.richlist_page.enabled == true
+                li#richlist.nav-item
+                  a.nav-link(href='/richlist')
+                    span.fab.fa-btc
+                    span.margin-left-5 #{settings.locale.menu_richlist}
+              if settings.markets_page.enabled == true
+                if settings.markets_page.show_market_dropdown_menu == true && settings.market_count > 1
+                  li#markets.dropdown.nav-item
+                    a.nav-link.dropdown-toggle(data-bs-toggle='dropdown', href='#')
+                      span.fas.fa-chart-line
+                      span.margin-left-5 #{settings.locale.menu_markets}
+                    div.dropdown-menu
+                      each mkt in settings.market_data
+                        if mkt != null && mkt.id != null
+                          each pair in mkt.trading_pairs
+                            a.dropdown-item(href='/markets/' + mkt.id + '/' + pair.pair)
+                              if pair.isAlt == true
+                                if mkt.alt_logo != null && mkt.alt_logo != ''
+                                  img.market-logo(src='data:image/png;base64,' + mkt.alt_logo, title=mkt.alt_name + ' (' + pair.pair + ')', alt=mkt.alt_name + ' (' + pair.pair + ')')
+                                else
+                                  i.market-logo.fas.fa-question-circle
+                                span #{mkt.alt_name}
+                                  span.small.fw-normal  (#{pair.pair})
+                              else
+                                if mkt.logo != null && mkt.logo != ''
+                                  img.market-logo(src='data:image/png;base64,' + mkt.logo, title=mkt.name + ' (' + pair.pair + ')', alt=mkt.name + ' (' + pair.pair + ')')
+                                else
+                                  i.market-logo.fas.fa-question-circle
+                                span #{mkt.name}
+                                  span.small.fw-normal  (#{pair.pair})
+                else
+                  li#markets.nav-item
+                    a.nav-link(href='/markets/' + settings.markets_page.default_exchange.exchange_name + '/' + settings.markets_page.default_exchange.trading_pair)
+                      span.fas.fa-chart-line
+                      span.margin-left-5 #{settings.locale.menu_markets}
+              if settings.api_page.enabled == true
+                li#info.nav-item
+                  a.nav-link(href='/info')
+                    span.fa.fa-info-circle
+                    span.margin-left-5 #{settings.locale.menu_api}
+              if settings.claim_address_page.show_header_menu == true && settings.claim_address_page.enabled == true
+                li#claim-address.nav-item
+                  a.nav-link(href='/claim')
+                    span.far.fa-address-card
+                    span.margin-left-5 #{settings.locale.menu_claim_address}
+          if settings.shared_pages.page_header.search.enabled == true && settings.shared_pages.page_header.search.position.toString().toLowerCase() == 'inside-header'
+            button#search-header-button(data-bs-toggle='collapse', data-bs-target='#search-navbar-collapse')
+              span.fas.fa-search
+      if settings.shared_pages.page_header.search.enabled == true && settings.shared_pages.page_header.search.position.toString().toLowerCase() == 'inside-header'
+        div#search-navbar-collapse.collapse
+          div.navbar-nav.align-items-lg-center.search-box-custom(style='width:100%;')
+            form.form-inline.col-12.d-flex.justify-content-center(method='post', action='/search')
+              div.input-group.input-group-md.search-for(style='width:100%;')
+                input.form-control(type='text', name='search', placeholder=settings.locale.ex_search_message)
+                button.btn.btn-success.btn-sm(type='submit') #{settings.locale.ex_search_button}
+    div#body-container.container(style='margin-top:' + (settings.shared_pages.page_header.sticky_header == true ? '80px;' : '20px;'))
+      if showSync != null && showSync == true
+        .col-lg-12
+          .alert.alert-warning
+            .cardSpacer
+              span.fas.fa-exclamation-triangle(style='margin-right:5px;')
+              strong #{settings.locale.ex_warning}
+            div #{settings.locale.initial_index_alert}
+      if showPanels == true || (settings.shared_pages.page_header.search.enabled == true && settings.shared_pages.page_header.search.position.toString().toLowerCase() == 'below-header')
+        .col-lg-12
+          if showPanels == true
+            .row.text-center.d-flex.justify-content-center
+              div(class="col-lg-2 col-lg-offset-" + settings.paneloffset)
+                - if (settings.panel1 != '') {
+                  .card.card-default.border-0.d-lg-block.d-block.cardSpacer(id='pnlOne')
+                - }
+              - if (settings.panel2 != '') {
+                .col-lg-2
+                  .card.card-default.border-0.d-lg-block.d-block.cardSpacer(id='pnlTwo')
+              - }
+              - if (settings.panel3 != '') {
+                .col-lg-2
+                  .card.card-default.border-0.d-lg-block.d-block.cardSpacer(id='pnlThree')
+              - }
+              - if (settings.panel4 != '') {
+                .col-lg-2
+                  .card.card-default.border-0.d-lg-block.d-block.cardSpacer(id='pnlFour')
+              - }
+              - if (settings.panel5 != '') {
+              .col-lg-2
+                .card.card-default.border-0.d-lg-block.d-block.cardSpacer(id='pnlFive')
+              - }
+          if settings.shared_pages.page_header.search.enabled == true && settings.shared_pages.page_header.search.position.toString().toLowerCase() == 'below-header'
+            div#search-row.row.text-center
+              form.form-inline.col-12.d-flex.justify-content-center(method='post', action='/search')
+                #index-search.form-group.d-flex.justify-content-center
+                  input.form-control(type='text', name='search', placeholder=settings.locale.ex_search_message, style='min-width:80%;margin-right:5px;')
+                  button.btn.btn-success(type='submit') #{settings.locale.ex_search_button}
+      if settings.network_history.enabled == true && ((showNethashChart == true && settings.shared_pages.page_header.network_charts.nethash_chart.enabled == true && settings.shared_pages.show_hashrate == true) || (showDifficultyChart == true && settings.shared_pages.page_header.network_charts.difficulty_chart.enabled == true))
+        .container
+          .row.align-items-start
+            - var chartColumnClass = 'col-lg-12';
+            if showNethashChart == true && settings.shared_pages.page_header.network_charts.nethash_chart.enabled == true && settings.shared_pages.show_hashrate == true && showDifficultyChart == true && settings.shared_pages.page_header.network_charts.difficulty_chart.enabled == true
+              - chartColumnClass = 'col-lg-6';
+            if showNethashChart == true && settings.shared_pages.page_header.network_charts.nethash_chart.enabled == true && settings.shared_pages.show_hashrate == true
+              div#nethashChartParent(class=chartColumnClass, style='display:none;margin:10px 0;')
+                .card.card-default.border-0
+                  .card-header
+                    strong Network Hashrate
+                  .card-body
+                    canvas#nethashChart(style='max-height:300px;background-color:'+settings.shared_pages.page_header.network_charts.nethash_chart.bgcolor+';')
+            if showDifficultyChart == true && settings.shared_pages.page_header.network_charts.difficulty_chart.enabled == true
+              div#difficultyChartParent(class=chartColumnClass, style='display:none;margin:10px 0;')
+                .card.card-default.border-0
+                  .card-header
+                    strong Network Difficulty
+                  .card-body
+                    canvas#difficultyChart(style='max-height:300px;background-color:'+settings.shared_pages.page_header.network_charts.difficulty_chart.bgcolor+';')
+      block content
+    div#footer-container(class=footerClasses, role='navigation')
+      .col-4.navbar-nav
+        ul.nav.justify-content-left
+          each social in settings.shared_pages.page_footer.social_links
+            if social.enabled
+              li.float-start
+                a.nav-link.social-link.border-0(href=social.url, target='_blank', alt=settings.coin.name + ' ' + social.tooltip_text, title=settings.coin.name + ' ' + social.tooltip_text, data-bs-toggle='tooltip', data-bs-placement='top')
+                  if social.fontawesome_class != null && social.fontawesome_class != ''
+                    span(class='vertical-align-middle ' + social.fontawesome_class)
+                  else
+                    img(class='vertical-align-middle', src=social.image_path)
+      .col-4.navbar-nav
+        ul.nav.justify-content-center
+          li.text-center
+            p
+              a.nav-link.poweredby.border-0(href='https://putincoin.info', target='_blank') PUTinCoin Explorer - (c) 2017-2022 (based on eIquidus v#{settings.explorer_version}#{(settings.revision == null || settings.revision == '' ? '' : `-${settings.revision}`)})
+      .col-4.navbar-nav
+        ui.nav.justify-content-end
+          label#lblBlockcount.badge.nav-link.border-0.float-end
+          label#lblConnections.badge.nav-link.border-0.float-end

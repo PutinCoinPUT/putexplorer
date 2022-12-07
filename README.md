@@ -850,7 +850,7 @@ This error can appear when you try to run the explorer on a port number lower th
 
 ### Donations / Support Us
 
-The PUTinCoin Project would like to thank the [Exor development team](https://exor.io/#section-team) for providing the outstanding basis for this explorer. If you like the PUTinCoin project, please consider supporting our continued development of this and many other cool crypto projects which you can find on our [github page](https://github.com/PutinCoinPUT).
+The PUTinCoin project would like to thank the [Exor development team](https://exor.io/#section-team) for providing the outstanding basis for this explorer. If you like the PUTinCoin project, please consider supporting our continued development of this and many other cool crypto projects which you can find on our [github page](https://github.com/PutinCoinPUT).
 
 Please consider supporting us with a small donation by sending us some cryptocurrency:
 

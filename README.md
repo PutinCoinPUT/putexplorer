@@ -850,12 +850,11 @@ This error can appear when you try to run the explorer on a port number lower th
 
 ### Donations / Support Us
 
-The PUTinCoin Explorer (based on eIquidus) block explorer is brought to you by the tireless efforts of the [Exor development team](https://exor.io/#section-team) for the benefit of the greater crypto community. If you enjoy our work, please consider supporting our continued development of this and many other cool crypto projects which you can find on our [github page](https://github.com/team-exor).
+The PUTinCoin Project would like to thank the [Exor development team](https://exor.io/#section-team) for providing the outstanding basis for this explorer. If you like the PUTinCoin project, please consider supporting our continued development of this and many other cool crypto projects which you can find on our [github page](https://github.com/PutinCoinPUT).
 
 Please consider supporting us with a small donation by sending us some cryptocurrency:
 
-- **BTC:** [15zQAQFB9KR35nPWEJEKvmytUF6fg2zvdP](https://www.blockchain.com/btc/address/15zQAQFB9KR35nPWEJEKvmytUF6fg2zvdP)
-- **EXOR:** [EYYW8Nvz5aJz33M3JNHXG2FEHWUsntozrd](https://explorer.exor.io/address/EYYW8Nvz5aJz33M3JNHXG2FEHWUsntozrd)
+- **PUT:** [PJjoBKqg6o6WGU925fEHUqYMday2As4dHc](https://putincoin.info/address/PJjoBKqg6o6WGU925fEHUqYMday2As4dHc)
 
 We also encourage submitting quality pull requests from software developers looking to help make the block explorer even better.
 

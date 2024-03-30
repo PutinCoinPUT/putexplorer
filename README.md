@@ -1,15 +1,30 @@
-# PUTinCoin Explorer (based on eIquidus)
+# eIquidus
 
-Written in node.js and mongodb, PUTinCoin Explorer (based on eIquidus) is the most stable, secure, customizable and feature-rich open-source block explorer with support for virtually any altcoin that implements some form of the [Bitcoin RPC API protocol](https://developer.bitcoin.org/reference/rpc/index.html). All features from the [original iquidus explorer](https://github.com/iquidus/explorer) are included here along with many new ideas from other iquidus forks, and an absolute ton of new custom changes and bug fixes that were developed specifically for PUTinCoin Explorer (based on eIquidus).
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/team-exor/eiquidus?color=ffbd11&label=version)
+![GitHub Release Date](https://img.shields.io/github/release-date/team-exor/eiquidus)
+![GitHub last commit](https://img.shields.io/github/last-commit/team-exor/eiquidus)
+<img src="public/img/screenshots/platform-windows macos linux-lightgrey.svg" />
+![GitHub](https://img.shields.io/github/license/team-exor/eiquidus?color=ffbd11)
 
-![Homepage](public/img/screenshots/homepage-1-100-0.png)
+Written in node.js and mongodb, eIquidus is the most stable, secure, customizable and feature-rich open-source block explorer with support for virtually any altcoin that implements some form of the [Bitcoin RPC API protocol](https://developer.bitcoin.org/reference/rpc/index.html) (EVM blockchains such as ETH, BNB, etc. are not supported). Originally built for the [Exor blockchain](https://github.com/team-exor/exor), eIquidus has since grown into a fully-featured explorer with a focus on stability and security at its core. All features from the [original iquidus explorer](https://github.com/iquidus/explorer) are included here along with many new ideas from other iquidus forks, and an absolute ton of new custom changes and bug fixes that were developed specifically for eIquidus.
+
+![Homepage](public/img/screenshots/homepage-1-102-0.png)
+
+### Crowdfunding Program
+
+Exor accepts targeted donations in an effort to crowdfund various feature and improvement requests for the block explorer and other Exor-related projects. [Browse the list of unfunded tasks](https://exor.io/tasklist/hide-completed/hide-funded/show-unfunded/) and send Exor coins to the correct funding address to help meet the funding goal for tasks that you would like to see developed. Once the funding goal is met, Exor developers will begin work on the task asap and will remain a top priority until completed. If you are a software developer and would like to work on funded tasks in exchange for payment in EXOR, please get in touch with us using one of the [Developer Contact](#developer-contact) links below.
 
 ### Premium Support
 
-All code in this project is open source and available free-of-charge under the BSD-3-Clause license. If you require assistance setting up an explorer for your coin, or are interested in hiring a developer to incorporate custom changes for your explorer, you may contact the developer using the link below:
+All code in this project is open source and available free-of-charge under the BSD-3-Clause license. If you require assistance setting up an explorer for your coin, or are interested in hiring a developer to incorporate custom changes for your explorer, you may contact the developer using the [Developer Contact](#developer-contact) links below.
+
+### Developer Contact
+
+Feel free to contact the developer using one of the options below:
 
 <div align="center">
-<a href="mailto:support@putincoin.org"><strong>support@putincoin.org</strong></a>
+<a href="https://discord.gg/dSuGm3y"><img src="https://img.shields.io/badge/Discord-Joe%20%5BTeam%20Exor%5D-blue?style=for-the-badge&logo=Discord" /></a>&nbsp;
+<a href="https://t.me/joeuhren"><img src="https://img.shields.io/badge/Telegram-joeuhren-blue?style=for-the-badge&logo=Telegram" /></a>
 </div>
 
 Table of Contents
@@ -18,13 +33,13 @@ Table of Contents
 - [Features](#features)
 - [See it in Action](#see-it-in-action)
 - [Installation](#installation)
-  - [Full Setup Guide](#full-setup-guide)
-  - [Quick Install Instructions](#quick-install-instructions)
-    - [Pre-Install](#pre-install)
-    - [Database Setup](#database-setup)
-    - [Download Source Code](#download-source-code)
-    - [Install Node Modules](#install-node-modules)
-    - [Configure Explorer Settings](#configure-explorer-settings)
+  - [Pre-Install](#pre-install)
+    - [Node.js](#nodejs)
+    - [MongoDB](#mongodb)
+  - [Database Setup](#database-setup)
+  - [Download Source Code](#download-source-code)
+  - [Install Node Modules](#install-node-modules)
+  - [Configure Explorer Settings](#configure-explorer-settings)
 - [Start/Stop the Explorer](#startstop-the-explorer)
   - [Start Explorer (Use for Testing)](#start-explorer-use-for-testing)
   - [Stop Explorer (Use for Testing)](#stop-explorer-use-for-testing)
@@ -62,17 +77,20 @@ Table of Contents
 ### Features
 
 - Built using the following scripts and technologies:
-  - Node.js (v16.13.1 or newer recommended)
-  - MongoDB (v5.0.4 or newer recommended)
-  - JQuery v3.6.0
+  - Node.js (v20.9.0 or newer recommended)
+  - MongoDB (v7.0.2 or newer recommended)
+  - jQuery v3.7.1
   - Bootstrap v5.1.3
-  - DataTables v1.11.3
-  - FontAwesome v5.15.4
-  - Luxon v2.1.1
-  - jqPlot v1.0.9
-  - Chart.js v3.6.1
-    - chartjs-plugin-crosshair v1.2.0 ([https://github.com/abelheinsbroek/chartjs-plugin-crosshair](https://github.com/abelheinsbroek/chartjs-plugin-crosshair))
-  - flag-icon-css v4.1.4 ([https://github.com/lipis/flag-icon-css](https://github.com/lipis/flag-icon-css))
+  - DataTables v1.13.6
+  - Font Awesome v6.4.2
+  - Luxon v3.4.3
+  - Chart.js v4.4.0
+    - chartjs-plugin-crosshair v2.0.0 ([https://github.com/abelheinsbroek/chartjs-plugin-crosshair](https://github.com/abelheinsbroek/chartjs-plugin-crosshair))
+    - chartjs-chart-financial v0.1.1 ([https://github.com/chartjs/chartjs-chart-financial](https://github.com/chartjs/chartjs-chart-financial))
+    - chartjs-adapter-luxon v1.3.1 ([https://github.com/chartjs/chartjs-adapter-luxon](https://github.com/chartjs/chartjs-adapter-luxon))
+  - OverlayScrollbars v2.3.2
+  - flag-icons v6.11.1 ([https://github.com/lipis/flag-icons](https://github.com/lipis/flag-icons))
+  - Intl.js (uses the v3.111.0 polyfill service to only download if using a browser that doesn't already support the ECMAScript Internationalization API)
 - Platform independent (tested to run on Windows, MacOS and Linux) **NOTE:** Most of the instructions in this guide were written for use with Linux and may need to be modified when using another OS
 - Mobile-friendly
 - Sass support
@@ -82,17 +100,14 @@ Table of Contents
   - **Movement:** Displays latest blockchain transactions that are greater than a certain configurable amount
   - **Network:** Displays a list of peers that have connected to the coind wallet in the past 24 hours, along with useful addnode data that can be used to connect your own wallets to the network easier
   - **Top 100:** Displays the top 100 richest wallet addresses, the top 100 wallet addresses that have the highest total number of coins received based on adding up all received transactions, as well as a table and pie chart breakdown of wealth distribution. Additional support for omitting burned coins from top 100 lists
-  - **Markets:** Displays a number of exchange-related metrics including market summary, 24 hour chart, most recent buy/sell orders and latest trade history. The last known default exchange price is automatically converted to USD using the coingecko api from [https://www.coingecko.com/en/api](https://www.coingecko.com/en/api). The following 10 cryptocurrency exchanges are supported:
+  - **Markets:** Displays a number of exchange-related metrics including market summary, 24 hour chart, most recent buy/sell orders and latest trade history. Has the ability to integrate directly with exchange apis and/or the coingecko api from [https://www.coingecko.com/en/api](https://www.coingecko.com/en/api) to retrieve current market prices and convert to USD. The following 7 cryptocurrency exchanges are supported:
     - [AltMarkets](https://altmarkets.io)
-    - [Bittrex](https://bittrex.com)
-    - [Bleutrade](https://bleutrade.com)
-    - [Crex24](https://crex24.com)
     - [Dex-Trade](https://dex-trade.com)
     - [FreiExchange](https://freiexchange.com)/[FreiXLite](https://freixlite.com) *\*no chart support due to a lack of OHLCV api data*
+    - [NonKyc](https://nonkyc.io)
     - [Poloniex](https://poloniex.com)
-    - [SouthXchange](https://southxchange.com)
-    - [Stex](https://stex.com)
-    - [Yobit](https://yobit.io) *\*no chart support due to a lack of OHLCV api data*
+    - [Xeggex](https://xeggex.com)
+    - [Yobit](https://yobit.net) *\*no chart support due to a lack of OHLCV api data*
   - **API:** A listing of available public API's that can be used to retrieve information from the network without the need for a local wallet. The following public API's are supported:
     - **RPC API calls** (Return data from coind)
       - **getdifficulty:** Returns the current difficulty
@@ -114,17 +129,18 @@ Table of Contents
       - **getlasttxs:** Returns transactions greater than a specific number of coins, starting from a particular offset
       - **getcurrentprice:** Returns last known exchange price
       - **getbasicstats:** Returns basic statistics about the coin including: block count, circulating supply, USD price, default market price and # of masternodes *\*# of masternodes is only applicable to masternode coins*
-      - **getsummary:** Returns a summary of coin data including: difficulty, hybrid difficulty, circulating supply, hash rate, default market price, network connection count, block count, count of online masternodes and count of offline masternodes *\*masternode counts are only applicable to masternode coins*
+      - **getsummary:** Returns a summary of coin data including: difficulty, hybrid difficulty, circulating supply, hash rate, default market price, USD price, network connection count, block count, count of online masternodes and count of offline masternodes *\*masternode counts are only applicable to masternode coins*
       - **getnetworkpeers:** Returns the list of network peers that have connected to the explorer node in the last 24 hours
       - **getmasternodelist:** Returns the complete list of masternodes on the network *\*only applicable to masternode coins*
       - **getmasternoderewards:** Returns a list of masternode reward transactions for a specific address that arrived after a specific block height *\*only applicable to masternode coins*
       - **getmasternoderewardstotal:** Returns the total number of coins earned in masternode rewards for a specific address that arrived after a specific block height *\*only applicable to masternode coins*
   - **Claim Address:** Allows anyone to set custom display names for wallet addresses that they own using the **Sign Message** feature from their local wallet. Includes *bad word* filter support.
-  - **Block Info:** Displays block summary and list of transactions for a specific block height
+  - **Orphaned Blocks:** Displays a list of orphaned blocks with links to the next and previous "good" blocks
+  - **Block Info:** Displays block summary and list of transactions for a specific block height along with optional hash algorithm for multi-algo coins
   - **Transaction Info:** Displays transaction summary, optional OP_RETURN value, list of input addresses and output addresses for a specific transaction
   - **Address Info:** Displays wallet address summary (balance, total sent, total received, QR code) and a list of latest transactions for a specific wallet address
 - Choose from 26 built-in themes with tweakable settings such as light and dark options to customize the look and feel of the explorer:
-  - **Exor** *\*default theme made especially for PUTinCoin Explorer (based on eIquidus)*
+  - **Exor** *\*default theme made especially for eIquidus*
   - **Cerulean** ([Preview](https://bootswatch.com/cerulean/))
   - **Cosmo** ([Preview](https://bootswatch.com/cosmo/))
   - **Cyborg** ([Preview](https://bootswatch.com/cyborg/))
@@ -156,7 +172,9 @@ Table of Contents
   - **Masternodes:** Displays a count of online and unreachable masternodes *\*only applicable to masternode coins*
   - **Coin Supply:** Displays the current circulating coin supply value
   - **Price:** Displays the current market price (value measured using default market pair)
-  - **Market Cap:** Displays the current market cap value in (value measured using default market pair)
+  - **USD Price:** Displays the current market price (value measured in USD)
+  - **Market Cap:** Displays the current market cap value (value measured using default market pair)
+  - **USD Market Cap:** Displays the current market cap value (value measured in USD)
   - **Logo:** Display an image of your coin logo
 - Configurable network charts that can be independently displayed in the header of any page
   - **Hashrate chart:** Line graph listing of the estimated network hashes per second over the last number of blocks *\*Requires a full sync before network data will start being collected*
@@ -211,36 +229,70 @@ Table of Contents
 
 ### See it in Action
 
--  https://putincoin.info/
+-  https://explorer.exor.io/
 
 ### Installation
 
-#### Full Setup Guide
-
-While we do not yet have our own step-by-step setup instructions, there are a few well-written guides out there already that detail how to set up and install the [original iquidus explorer](https://github.com/iquidus/explorer). Because the setup process for iquidus is more-or-less identical to PUTinCoin Explorer (based on eIquidus) at this moment in time (making changes to settings.json is probably the biggest difference although we have helpful comments for each setting), here are some of the more complete guides that may be useful for anyone who needs more detailed instructions than are provided in the [Quick Install Instructions](#quick-install-instructions):
-
-1. [Beginners Guide for Iquidus Explorer Setup](https://gist.github.com/samqju/b9fc6c007f083e6429387051e24da1c3)
-2. [Node and Iquidus Explorer Setup for Dummies](https://gist.github.com/scottie/b6179c34ce3cf200fcc5d08727a46623)
-3. [Iquidus Block Explorer Guide](https://www.reddit.com/r/BiblePay/comments/7elm7r/iquidus_block_explorer_guide)
-4. [The Ultimate Iquidus Explorer Installation Guide - WAYBACKMACHINE](https://web.archive.org/web/20210228210054/https://stakeandnodes.net/iquidus-explorer-installation-guide/)
-
-#### Quick Install Instructions
-
-##### Pre-Install
+#### Pre-Install
 
 The following prerequisites must be installed before using the explorer:
 
-- [Node.js](https://nodejs.org/en/) (v14.15.4 or newer recommended)
-- [MongoDB](https://www.mongodb.com/) (v4.4.3 or newer recommended)
+- [Node.js](https://nodejs.org/en/) (v20.9.0 or newer recommended)
+- [MongoDB](https://www.mongodb.com/) (v7.0.2 or newer recommended)
 - [Git](https://git-scm.com/downloads) (v2.36.0 or newer recommended)
 - A fully synchronized *coind* wallet daemon that supports the [Bitcoin RPC API protocol](https://developer.bitcoin.org/reference/rpc/index.html). **NOTE:** In most cases, the blockchain must be synced with the `txindex` feature enabled to have access to all transactions. See the [Wallet Settings](#wallet-settings) section for more details.
 
-##### Database Setup
+##### Node.js
 
-Open the MongoDB cli:
+The recommended way to install Node.js is by using the Node Version Manager (NVM):
 
 ```
-mongo
+sudo apt update
+sudo apt install curl
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+source ~/.profile
+nvm install --lts
+```
+
+Using the `--lts` option in the last cmd above will install the most recent LTS version of Node.js. If you want to install a specific version you can do it with the following cmd:
+
+```
+nvm install 20.9.0
+```
+
+If desired, multiple versions of Node.js can be installed at the same time with NVM. Use the following syntax to easily change the current Node.js version to another installed version:
+
+```
+nvm use 18.14.2
+```
+
+##### MongoDB
+
+It is recommended to follow the install instructions at the official mongo website since they will be updated more often and have specific instructions for many different operating systems: [https://www.mongodb.com/docs/manual/administration/install-community/](https://www.mongodb.com/docs/manual/administration/install-community/).
+
+Below are instructions to install the latest v7.x version of MongoDB on Ubunutu 22.04 (run one line at a time):
+
+```
+sudo apt-get install gnupg curl
+curl -fsSL https://pgp.mongodb.com/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+```
+
+Once MongoDB is installed it is recommended to run the following cmds to start the database server and add it as a service to ensure it starts up automatically after a reboot:
+
+```
+sudo systemctl start mongod
+sudo systemctl enable mongod.service
+```
+
+#### Database Setup
+
+Open the MongoDB cli (The legacy mongo shell `mongo` was deprecated in MongoDB v5.0 and removed in MongoDB v6.0. Newer installs must now use `mongosh`):
+
+```
+mongosh
 ```
 
 Select database:
@@ -251,25 +303,31 @@ Select database:
 use explorerdb
 ```
 
-Create a new user with read/write access (also this has to be the same in `settings.json`):
+Create a new user with read/write access:
 
 ```
-db.createUser( { user: "dbuseryoulike", pwd: "dbpasswordyoulike", roles: [ "readWrite" ] } )
+db.createUser( { user: "eiquidus", pwd: "Nd^p2d77ceBX!L", roles: [ "readWrite" ] } )
 ```
 
-##### Download Source Code
+Exit the mongo shell:
 
 ```
-git clone https://github.com/PutinCoinPUT/putexplorer explorer
+exit
 ```
 
-##### Install Node Modules
+#### Download Source Code
+
+```
+git clone https://github.com/team-exor/eiquidus explorer
+```
+
+#### Install Node Modules
 
 ```
 cd explorer && npm install --only=prod
 ```
 
-##### Configure Explorer Settings
+#### Configure Explorer Settings
 
 ```
 cp ./settings.json.template ./settings.json
@@ -277,7 +335,7 @@ cp ./settings.json.template ./settings.json
 
 *Make required changes in settings.json*
 
-**NOTE:** You can further customize the site by adding css rules to the `public/css/custom.scss` file. Adding changes to `custom.scss` is the preferred method of customizing the css rules for your site, without affecting the ability to receive explorer code updates in the future.
+**NOTE:** You can further customize the site by adding your own javascript code to the `public/js/custom.js` file and css rules to the `public/css/custom.scss` file. Adding changes to `custom.js` and `custom.scss` is the preferred method of customizing your site, without affecting the ability to receive explorer code updates in the future.
 
 ### Start/Stop the Explorer
 
@@ -496,7 +554,7 @@ Easier crontab syntax using npm scripts, but may not work on some systems depend
 
 ```
 */1 * * * * cd /path/to/explorer && npm run sync-blocks > /dev/null 2>&1
-*/2 * * * * cd /path/to/explorer && npm run sync-markets > /dev/null 2>&1
+*/5 * * * * cd /path/to/explorer && npm run sync-markets > /dev/null 2>&1
 */5 * * * * cd /path/to/explorer && npm run sync-peers > /dev/null 2>&1
 */5 * * * * cd /path/to/explorer && npm run sync-masternodes > /dev/null 2>&1
 ```
@@ -505,14 +563,14 @@ Or, run the crontab by calling the sync script directly, which should work bette
 
 ```
 */1 * * * * cd /path/to/explorer && /path/to/node scripts/sync.js update > /dev/null 2>&1
-*/2 * * * * cd /path/to/explorer && /path/to/node scripts/sync.js market > /dev/null 2>&1
+*/5 * * * * cd /path/to/explorer && /path/to/node scripts/sync.js market > /dev/null 2>&1
 */5 * * * * cd /path/to/explorer && /path/to/node scripts/sync.js peers > /dev/null 2>&1
 */5 * * * * cd /path/to/explorer && /path/to/node scripts/sync.js masternodes > /dev/null 2>&1
 ```
 
 ### Wallet Settings
 
-The wallet connected to PUTinCoin Explorer (based on eIquidus) must be running with the following flags:
+The wallet connected to eIquidus must be running with the following flags:
 
 ```
 -daemon -txindex
@@ -555,7 +613,7 @@ You should now be able to browse to the explorer by IP address or domain name wi
 
 **NOTE:** The following instructions are for Linux users only, but installing and configuring another webserver should be possible on any OS
 
-A few steps are involved in setting up another webserver that can bind to port 80 and forward all incoming traffic to the PUTinCoin Explorer (based on eIquidus) node.js app. Any commercial webserver can be used to create the reverse proxy, but in this case, Nginx will be used as an example:
+A few steps are involved in setting up another webserver that can bind to port 80 and forward all incoming traffic to the eIquidus node.js app. Any commercial webserver can be used to create the reverse proxy, but in this case, Nginx will be used as an example:
 
 1. Install Nginx with the following terminal cmd:
 
@@ -602,7 +660,7 @@ sudo ln -s /etc/nginx/sites-available/node /etc/nginx/sites-enabled/node
 sudo service nginx restart
 ```
 
-7. Nginx will now forward all incoming requests to PUTinCoin Explorer (based on eIquidus) and after restarting the explorer it should be browsable via http://example.com without the need for the http://example.com:3001 port any longer.
+7. Nginx will now forward all incoming requests to eIquidus and after restarting the explorer it should be browsable via http://example.com without the need for the http://example.com:3001 port any longer.
 
 ### TLS/SSL Support
 
@@ -648,7 +706,17 @@ Follow the steps below to configure the Express webserver for use with TLS/SSL:
 
 1. If you haven't already done so, run the `setcap` cmd from the [Use Setcap to Safely Grant User Permissions Instructions](#use-setcap-to-safely-grant-user-permissions) which will allow node.js to bind to port 443 without needing root permissions.
 
-2. There are different options for generating a valid TLS/SSL certificate, but in this case it is assumed that you do not have another webserver running on port 80 and therefore the standalone install method will be used. If you do have a webserver running, this cmd will fail unless you temporarily stop the webserver before continuing:
+2. There are different options for generating a valid TLS/SSL certificate via certbot. If you are running the explorer on port 80 you can run the cmd on step 2A), otherwise run the cmd on step 2B) if the explorer is running on any port # other than 80. This step is important because certbot will automatically renew your TLS/SSL certificate periodically and it will fail to renew if the wrong option is chosen:
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A. The Webroot method is used when port 80 is already in use by the explorer. Be sure to change the webroot-path to the absolute path of the explorer/public directory:
+
+**NOTE:** The explorer must be running for this cmd to work properly:
+
+```
+sudo certbot certonly --webroot --webroot-path /path/to/explorer/public
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B. The Standalone method is used when port 80 is not already in use by the explorer:
 
 ```
 sudo certbot certonly --standalone
@@ -704,7 +772,7 @@ Certbot will ask a few simple questions and generate the necessary TLS/SSL certi
 
 ### CORS Support
 
-PUTinCoin Explorer (based on eIquidus) has basic CORS support which is useful to prevent other sites from consuming public APIs while still allowing specific websites whitelisted access.
+eIquidus has basic CORS support which is useful to prevent other sites from consuming public APIs while still allowing specific websites whitelisted access.
 
 #### What is CORS?
 
@@ -716,7 +784,7 @@ PUTinCoin Explorer (based on eIquidus) has basic CORS support which is useful to
 
 #### How to Benefit From Using CORS?
 
-You must first set up CORS in PUTinCoin Explorer (based on eIquidus) by editing the settings.json file and setting the value for `webserver.cors.enabled` to true.
+You must first set up CORS in eIquidus by editing the settings.json file and setting the value for `webserver.cors.enabled` to true.
 
 ```
   "webserver": {
@@ -733,15 +801,15 @@ The `webserver.cors.corsorigin` setting defaults to "\*" which allows all reques
       "corsorigin": "http://example.com"
 ```
 
-The above example would allow sharing of resources from PUTinCoin Explorer (based on eIquidus) for all data requests coming from the example.com domain, while all requests coming from any other domain would be rejected as per normal.
+The above example would allow sharing of resources from eIquidus for all data requests coming from the example.com domain, while all requests coming from any other domain would be rejected as per normal.
 
-Below is an example of a simple javascript call using [jQuery](https://jquery.com) that could be used on your example.com website to return the current block count from PUTinCoin Explorer (based on eIquidus):
+Below is an example of a simple javascript call using [jQuery](https://jquery.com) that could be used on your example.com website to return the current block count from eIquidus:
 
 ```
 jQuery(document).ready(function($) {
   $.ajax({
     type: "GET",
-    url: "http://your-explorer-url/api/getblockcount",
+    url: "http://your-eiquidus-url/api/getblockcount",
     cache: false
   }).done(function (data) {
     alert(data);
@@ -759,11 +827,45 @@ Automatically download and install the newest explorer source code, update out-o
 
 Update the explorer with the following command:
 
-`npm run update-explorer`
+```
+npm run update-explorer
+```
+
+or (useful for crontab):
+
+```
+cd /path/to/explorer && /path/to/node ./scripts/update_explorer.js
+```
+
+**NOTE:** The update script also supports a couple optional parameters.
+
+Use the following command if you want to update the explorer code only, without checking for out-of-date dependencies:
+
+```
+npm run update-explorer "explorer-only"
+```
+
+or (useful for crontab):
+
+```
+cd /path/to/explorer && /path/to/node ./scripts/update_explorer.js "explorer-only"
+```
+
+Use the following command if you want to upgrade outdated dependencies only, without checking for explorer code updates:
+
+```
+npm run update-explorer "dependencies-only"
+```
+
+or (useful for crontab):
+
+```
+cd /path/to/explorer && /path/to/node ./scripts/update_explorer.js "dependencies-only"
+```
 
 #### Backup Database Script
 
-Make a complete backup of an PUTinCoin Explorer (based on eIquidus) mongo database and save to compressed file. A built-in locking mechanism prevents data from being updated or changed while a backup is in process. Backups can be safely created while the explorer is actively running and/or while the explorer is turned off. The following backup scenarios are supported:
+Make a complete backup of an eIquidus mongo database and save to compressed file. A built-in locking mechanism prevents data from being updated or changed while a backup is in process. Backups can be safely created while the explorer is actively running and/or while the explorer is turned off. The following backup scenarios are supported:
 
 **Backup Database (No filename specified)**
 
@@ -787,9 +889,9 @@ Make a complete backup of an PUTinCoin Explorer (based on eIquidus) mongo databa
 
 #### Restore Database Script
 
-Restore a previously saved PUTinCoin Explorer (based on eIquidus) mongo database backup. :warning: **WARNING:** This will completely overwrite your existing PUTinCoin Explorer (based on eIquidus) mongo database, so be sure to make a full backup before proceeding. A built-in locking mechanism prevents data from being updated or changed while a backup is being restored. Backups can be safely restored while the explorer is actively running and/or while the explorer is turned off.
+Restore a previously saved eIquidus mongo database backup. :warning: **WARNING:** This will completely overwrite your existing eIquidus mongo database, so be sure to make a full backup before proceeding. A built-in locking mechanism prevents data from being updated or changed while a backup is being restored. Backups can be safely restored while the explorer is actively running and/or while the explorer is turned off.
 
-**NOTE:** Older v1.x PUTinCoin Explorer (based on eIquidus) database backups were compressed into tar.gz files. These older tar.gz backups can still be restored, but you must specifically add the .tar.gz suffix. Example: `npm run restore-backup /path/to/old_backup.tar.gz`
+**NOTE:** Older v1.x eIquidus database backups were compressed into tar.gz files. These older tar.gz backups can still be restored, but you must specifically add the .tar.gz suffix. Example: `npm run restore-backup /path/to/old_backup.tar.gz`
 
 The following restore scenarios are supported:
 
@@ -811,7 +913,7 @@ The following restore scenarios are supported:
 
 #### Delete Database Script
 
-Wipe the eIquidus mongo database clean to start again from scratch. :warning: **WARNING:** This will completely destroy all data in your existing PUTinCoin Explorer (based on eIquidus) mongo database, so be sure to make a full backup before proceeding. A built-in locking mechanism prevents data from being updated or changed while the database is being deleted. The process to delete the database can be executed while the explorer is actively running and/or while the explorer is turned off.
+Wipe the eIquidus mongo database clean to start again from scratch. :warning: **WARNING:** This will completely destroy all data in your existing eIquidus mongo database, so be sure to make a full backup before proceeding. A built-in locking mechanism prevents data from being updated or changed while the database is being deleted. The process to delete the database can be executed while the explorer is actively running and/or while the explorer is turned off.
 
 Delete the mongo database with the following command:
 
@@ -843,20 +945,30 @@ Where [SIZE] is an integer higher than the default.
 
 *note: SIZE will depend on which blockchain you are using, you may need to play around a bit to find an optimal setting*
 
-
 **Error: bind EACCES ...**
 
 This error can appear when you try to run the explorer on a port number lower than 1024. There are a couple solutions to this problem which are explained in more detail in the [Run Express Webserver on Port 80](#run-express-webserver-on-port-80) section.
 
+**Error: Callback was already called**
+
+This error typically means there is some kind of connection issue between the explorer and the wallet daemon. The most common mistake that can cause this error is by configuring the wallet's P2P port # instead of the RPC port # in the settings.json. This can also happen if your wallet is not set up to accept RPC connections.
+
+**Warning: Accessing non-existent property 'padLevels' of module exports inside circular dependency**
+
+This warning is currently displayed when starting or stopping the explorer using the `forever` module. The good news is that this warning can safely be ignored although it can be confusing as to why it is displayed at all. This is a deep rooted issue with `forever` that is actively being discussed [here](https://github.com/foreversd/forever/issues/1077). Long story short is that `forever` depends on a number of outdated dependencies that require certain parts of the code to be rewritten and so far it has not been officially resolved yet. `Forever` is still included as an option for those who are used to using it although we recommend using `pm2` to run your production explorer since it is more modern and can do everything `forever` does and more.
+
 ### Donations / Support Us
 
-The PUTinCoin project would like to thank the [Exor development team](https://exor.io/#section-team) for providing the outstanding basis for this explorer. If you like the PUTinCoin project, please consider supporting our continued development of this and many other cool crypto projects which you can find on our [github page](https://github.com/PutinCoinPUT).
+The eIquidus block explorer is brought to you by the tireless efforts of the [Exor development team](https://exor.io/#section-team) for the benefit of the greater crypto community. If you enjoy our work, please consider supporting our continued development of this and many other cool crypto projects which you can find on our [github page](https://github.com/team-exor).
 
-Please consider supporting us with a small donation by sending us some cryptocurrency:
+You can support us via one of the following options:
 
-- **PUT:** [PJjoBKqg6o6WGU925fEHUqYMday2As4dHc](https://putincoin.info/address/PJjoBKqg6o6WGU925fEHUqYMday2As4dHc)
-
-We also encourage submitting quality pull requests from software developers looking to help make the block explorer even better.
+1. [Buy and hodl EXOR](https://freixlite.com/market/EXOR/LTC). Buying and trading our EXOR coin helps stimulate the market price which allows us to hire more developers and continue to release high quality products in the future.
+2. Participate in our [crowdfunding program](https://exor.io/tasklist/hide-completed/hide-funded/show-unfunded/) by either sending some cryptocurrency to help fund the tasks you are most eager to see brought to life or [submit a new custom task request](https://exor.io/add-new-task/) detailing a feature or improvement you would like to see developed for any Exor-related project.
+3. Consider a small donation by sending us some cryptocurrency:
+    - **BTC:** [15zQAQFB9KR35nPWEJEKvmytUF6fg2zvdP](https://www.blockchain.com/btc/address/15zQAQFB9KR35nPWEJEKvmytUF6fg2zvdP)
+    - **EXOR:** [EYYW8Nvz5aJz33M3JNHXG2FEHWUsntozrd](https://explorer.exor.io/address/EYYW8Nvz5aJz33M3JNHXG2FEHWUsntozrd)
+4. Are you a software developer? Consider taking advantage of our [crowdfunding program](https://exor.io/tasklist/hide-completed/) and get paid in EXOR to help make the block explorer and other Exor-related projects even better by submitting code improvements for open bounty tasks.
 
 ### Special Thanks
 
@@ -868,8 +980,7 @@ We also encourage submitting quality pull requests from software developers look
 
 ### License
 
-Copyright (c) 2021-2022, The PUTinCoin Community<br />
-Copyright (c) 2019-2022, The Exor Community<br />
+Copyright (c) 2019-2023, The Exor Community<br />
 Copyright (c) 2017, The Chaincoin Community<br />
 Copyright (c) 2015, Iquidus Technology<br />
 Copyright (c) 2015, Luke Williams<br />

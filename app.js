@@ -19,7 +19,7 @@ const { exec } = require('child_process');
 nodeapi.setWalletDetails(settings.wallet);
 // dynamically build the nodeapi cmd access list by adding all non-blockchain-specific api cmds that have a value
 Object.keys(settings.api_cmds).forEach(function(key, index, map) {
-  if (key != 'use_rpc' && settings.api_cmds[key] != null && settings.api_cmds[key] != '')
+  if (key != 'use_rpc' && key != 'rpc_concurrent_tasks' && settings.api_cmds[key] != null && settings.api_cmds[key] != '')
     apiAccessList.push(key);
 });
 // dynamically find and add additional blockchain_specific api cmds
@@ -33,8 +33,26 @@ Object.keys(settings.blockchain_specific).forEach(function(key, index, map) {
     });
   }
 });
+
 // whitelist the cmds in the nodeapi access list
 nodeapi.setAccess('only', apiAccessList);
+
+// determine if http traffic should be forwarded to https
+if (settings.webserver.tls.enabled == true && settings.webserver.tls.always_redirect == true) {
+  app.use(function(req, res, next) {
+    if (req.secure) {
+      // continue without redirecting
+      next();
+    } else {
+      // add webserver port to the host value if it does not already exist
+      const host = req.headers.host + (req.headers.host.indexOf(':') > -1 ? '' : ':' + settings.webserver.port.toString());
+
+      // redirect to the correct https page
+      res.redirect(301, 'https://' + host.replace(':' + settings.webserver.port.toString(), (settings.webserver.tls.port != 443 ? ':' + settings.webserver.tls.port.toString() : '')) + req.url);
+    }
+  });
+}
+
 // determine if cors should be enabled
 if (settings.webserver.cors.enabled == true) {
   app.use(function(req, res, next) {
@@ -44,6 +62,7 @@ if (settings.webserver.cors.enabled == true) {
     next();
   });
 }
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -78,43 +97,135 @@ app.use('/', routes);
 
 // post method to claim an address using verifymessage functionality
 app.post('/claim', function(req, res) {
-  // check if the bad-words filter is enabled
-  if (settings.claim_address_page.enable_bad_word_filter == true) {
-    // initialize the bad-words filter
-    var bad_word_lib = require('bad-words');
-    var bad_word_filter = new bad_word_lib();
+  // validate captcha if applicable
+  validate_captcha(settings.claim_address_page.enable_captcha, req.body, function(captcha_error) {
+    // check if there was a problem with captcha
+    if (captcha_error) {
+      // show the captcha error
+      res.json({'status': 'failed', 'error': true, 'message': 'The captcha validation failed'});
+    } else {
+      // check if the bad-words filter is enabled
+      if (settings.claim_address_page.enable_bad_word_filter == true) {
+        // initialize the bad-words filter
+        var bad_word_lib = require('bad-words');
+        var bad_word_filter = new bad_word_lib();
 
-    // clean the message (Display name) of bad words
-    var message = (req.body.message == null || req.body.message == '' ? '' : bad_word_filter.clean(req.body.message));
-  } else {
-    // Do not use the bad word filter
-    var message = (req.body.message == null || req.body.message == '' ? '' : req.body.message);
-  }
+        // clean the message (Display name) of bad words
+        var message = (req.body.message == null || req.body.message == '' ? '' : bad_word_filter.clean(req.body.message));
+      } else {
+        // do not use the bad word filter
+        var message = (req.body.message == null || req.body.message == '' ? '' : req.body.message);
+      }
 
-  // check if the message was filtered
-  if (message == req.body.message) {
-    // call the verifymessage api
-    lib.verify_message(req.body.address, req.body.signature, req.body.message, function(body) {
-      if (body == false)
-        res.json({'status': 'failed', 'error': true, 'message': 'Invalid signature'});
-      else if (body == true) {
-        db.update_label(req.body.address, req.body.message, function(val) {
-          // check if the update was successful
-          if (val == '')
-            res.json({'status': 'success'});
-          else if (val == 'no_address')
-            res.json({'status': 'failed', 'error': true, 'message': 'Wallet address ' + req.body.address + ' is not valid or does not have any transactions'});
-          else
+      // check if the message was filtered
+      if (message == req.body.message) {
+        // call the verifymessage api
+        lib.verify_message(req.body.address, req.body.signature, req.body.message, function(body) {
+          if (body == false)
+            res.json({'status': 'failed', 'error': true, 'message': 'Invalid signature'});
+          else if (body == true) {
+            db.update_claim_name(req.body.address, req.body.message, function(val) {
+              // check if the update was successful
+              if (val == '')
+                res.json({'status': 'success'});
+              else if (val == 'no_address')
+                res.json({'status': 'failed', 'error': true, 'message': 'Wallet address ' + req.body.address + ' is not valid or does not have any transactions'});
+              else
+                res.json({'status': 'failed', 'error': true, 'message': 'Wallet address or signature is invalid'});
+            });
+          } else
             res.json({'status': 'failed', 'error': true, 'message': 'Wallet address or signature is invalid'});
         });
-      } else
-        res.json({'status': 'failed', 'error': true, 'message': 'Wallet address or signature is invalid'});
-    });
-  } else {
-    // message was filtered which would change the signature
-    res.json({'status': 'failed', 'error': true, 'message': 'Display name contains bad words and cannot be saved: ' + message});
-  }
+      } else {
+        // message was filtered which would change the signature
+        res.json({'status': 'failed', 'error': true, 'message': 'Display name contains bad words and cannot be saved: ' + message});
+      }
+    }
+  });
 });
+
+function validate_captcha(captcha_enabled, data, cb) {
+  // check if captcha is enabled for the requested feature
+  if (captcha_enabled == true) {
+    // determine the captcha type
+    if (settings.captcha.google_recaptcha3.enabled == true) {
+      if (data.google_recaptcha3 != null) {
+        const request = require('postman-request');
+
+        request({uri: 'https://www.google.com/recaptcha/api/siteverify?secret=' + settings.captcha.google_recaptcha3.secret_key + '&response=' + data.google_recaptcha3, json: true}, function (error, response, body) {
+          if (error) {
+            // an error occurred while trying to validate the captcha
+            return cb(true);
+          } else if (body == null || body == '' || typeof body !== 'object') {
+            // return data is invalid
+            return cb(true);
+          } else if (body.score == null || body.score < settings.captcha.google_recaptcha3.pass_score) {
+            // captcha challenge failed
+            return cb(true);
+          } else {
+            // captcha challenge passed
+            return cb(false);
+          }
+        });
+      } else {
+        // a captcha response wasn't received
+        return cb(true);
+      }
+    } else if (settings.captcha.google_recaptcha2.enabled == true) {
+      if (data.google_recaptcha2 != null) {
+        const request = require('postman-request');
+
+        request({uri: 'https://www.google.com/recaptcha/api/siteverify?secret=' + settings.captcha.google_recaptcha2.secret_key + '&response=' + data.google_recaptcha2, json: true}, function (error, response, body) {
+          if (error) {
+            // an error occurred while trying to validate the captcha
+            return cb(true);
+          } else if (body == null || body == '' || typeof body !== 'object') {
+            // return data is invalid
+            return cb(true);
+          } else if (body.success == null || body.success == false) {
+            // captcha challenge failed
+            return cb(true);
+          } else {
+            // captcha challenge passed
+            return cb(false);
+          }
+        });
+      } else {
+        // a captcha response wasn't received
+        return cb(true);
+      }
+    } else if (settings.captcha.hcaptcha.enabled == true) {
+      if (data.hcaptcha != null) {
+        const request = require('postman-request');
+
+        request({uri: 'https://hcaptcha.com/siteverify?secret=' + settings.captcha.hcaptcha.secret_key + '&response=' + data.hcaptcha, json: true}, function (error, response, body) {
+          if (error) {
+            // an error occurred while trying to validate the captcha
+            return cb(true);
+          } else if (body == null || body == '' || typeof body !== 'object') {
+            // return data is invalid
+            return cb(true);
+          } else if (body.success == null || body.success == false) {
+            // captcha challenge failed
+            return cb(true);
+          } else {
+            // captcha challenge passed
+            return cb(false);
+          }
+        });
+      } else {
+        // a captcha response wasn't received
+        return cb(true);
+      }
+    } else {
+      // no captcha options are enabled
+      return cb(false);
+    }
+  } else {
+    // captcha is not enabled for this feature
+    return cb(false);
+  }
+}
 
 // extended apis
 app.use('/ext/getmoneysupply', function(req, res) {
@@ -188,7 +299,7 @@ app.use('/ext/gettx/:txid', function(req, res) {
     db.get_tx(txid, function(tx) {
       if (tx) {
         lib.get_blockcount(function(blockcount) {
-          res.send({ active: 'tx', tx: tx, confirmations: settings.shared_pages.confirmations, blockcount: (blockcount ? blockcount : 0)});
+          res.send({ active: 'tx', tx: tx, confirmations: (blockcount - tx.blockindex + 1), blockcount: (blockcount ? blockcount : 0)});
         });
       } else {
         lib.get_rawtransaction(txid, function(rtx) {
@@ -207,7 +318,7 @@ app.use('/ext/gettx/:txid', function(req, res) {
                       blockindex: -1
                     };
 
-                    res.send({ active: 'tx', tx: utx, confirmations: settings.shared_pages.confirmations, blockcount:-1});
+                    res.send({ active: 'tx', tx: utx, confirmations: rtx.confirmations, blockcount:-1});
                   } else {
                     var utx = {
                       txid: rtx.txid,
@@ -220,7 +331,7 @@ app.use('/ext/gettx/:txid', function(req, res) {
                     };
 
                     lib.get_blockcount(function(blockcount) {
-                      res.send({ active: 'tx', tx: utx, confirmations: settings.shared_pages.confirmations, blockcount: (blockcount ? blockcount : 0)});
+                      res.send({ active: 'tx', tx: utx, confirmations: rtx.confirmations, blockcount: (blockcount ? blockcount : 0)});
                     });
                   }
                 });
@@ -249,20 +360,6 @@ app.use('/ext/getbalance/:hash', function(req, res) {
     res.end('This method is disabled');
 });
 
-app.use('/ext/getcirculatingsupply', function(req, res) {
-  // check if the getcirculatingsupply api is enabled
-  if (settings.api_page.enabled == true && settings.api_page.public_apis.ext.getcirculatingsupply.enabled == true) {
-    db.get_richlist(settings.coin.name, function(richlist) {
-      db.get_stats(settings.coin.name, function(stats) {
-        db.get_circulatingsupply(richlist, stats, function(dist) {
-          res.send(dist);
-        });
-      });
-    });
-  } else
-    res.end('This method is disabled');
-});
-
 app.use('/ext/getdistribution', function(req, res) {
   // check if the getdistribution api is enabled
   if (settings.api_page.enabled == true && settings.api_page.public_apis.ext.getdistribution.enabled == true) {
@@ -281,7 +378,9 @@ app.use('/ext/getcurrentprice', function(req, res) {
   // check if the getcurrentprice api is enabled
   if (settings.api_page.enabled == true && settings.api_page.public_apis.ext.getcurrentprice.enabled == true) {
     db.get_stats(settings.coin.name, function (stats) {
-      eval('var p_ext = { "last_price_' + settings.markets_page.default_exchange.trading_pair.split('/')[1].toLowerCase() + '": stats.last_price, "last_price_usd": stats.last_usd_price, }');
+      const currency = lib.get_market_currency_code();
+
+      eval('var p_ext = { "last_price_' + currency.toLowerCase() + '": stats.last_price, "last_price_usd": stats.last_usd_price, }');
       res.send(p_ext);
     });
   } else
@@ -293,16 +392,18 @@ app.use('/ext/getbasicstats', function(req, res) {
   if (settings.api_page.enabled == true && settings.api_page.public_apis.ext.getbasicstats.enabled == true) {
     // lookup stats
     db.get_stats(settings.coin.name, function (stats) {
+      const currency = lib.get_market_currency_code();
+
       // check if the masternode count api is enabled
       if (settings.api_page.public_apis.rpc.getmasternodecount.enabled == true && settings.api_cmds['getmasternodecount'] != null && settings.api_cmds['getmasternodecount'] != '') {
         // masternode count api is available
         lib.get_masternodecount(function(masternodestotal) {
-          eval('var p_ext = { "block_count": (stats.count ? stats.count : 0), "money_supply": (stats.supply ? stats.supply : 0), "last_price_' + settings.markets_page.default_exchange.trading_pair.split('/')[1].toLowerCase() + '": stats.last_price, "last_price_usd": stats.last_usd_price, "masternode_count": masternodestotal.total }');
+          eval('var p_ext = { "block_count": (stats.count ? stats.count : 0), "money_supply": (stats.supply ? stats.supply : 0), "last_price_' + currency.toLowerCase() + '": stats.last_price, "last_price_usd": stats.last_usd_price, "masternode_count": masternodestotal.total }');
           res.send(p_ext);
         });
       } else {
         // masternode count api is not available
-        eval('var p_ext = { "block_count": (stats.count ? stats.count : 0), "money_supply": (stats.supply ? stats.supply : 0), "last_price_' + settings.markets_page.default_exchange.trading_pair.split('/')[1].toLowerCase() + '": stats.last_price, "last_price_usd": stats.last_usd_price }');
+        eval('var p_ext = { "block_count": (stats.count ? stats.count : 0), "money_supply": (stats.supply ? stats.supply : 0), "last_price_' + currency.toLowerCase() + '": stats.last_price, "last_price_usd": stats.last_usd_price }');
         res.send(p_ext);
       }
     });
@@ -435,82 +536,87 @@ app.use('/ext/getaddresstxs/:address/:start/:length', function(req, res) {
     res.end('This method is disabled');
 });
 
-app.use('/ext/getsummary', function(req, res) {
-  // check if the getsummary api is enabled or else check the headers to see if it matches an internal ajax request from the explorer itself (TODO: come up with a more secure method of whitelisting ajax calls from the explorer)
-  if ((settings.api_page.enabled == true && settings.api_page.public_apis.ext.getsummary.enabled == true) || (req.headers['x-requested-with'] != null && req.headers['x-requested-with'].toLowerCase() == 'xmlhttprequest' && req.headers.referer != null && req.headers.accept.indexOf('text/javascript') > -1 && req.headers.accept.indexOf('application/json') > -1)) {
+function get_connection_and_block_counts(get_data, cb) {
+  // check if the connection and block counts should be returned
+  if (get_data) {
     lib.get_connectioncount(function(connections) {
       lib.get_blockcount(function(blockcount) {
-        // check if this is a footer-only method that should only return the connection count and block count
-        if (req.headers['footer-only'] != null && req.headers['footer-only'] == 'true') {
-          // only return the connection count and block count
-          res.send({
-            connections: (connections ? connections : '-'),
-            blockcount: (blockcount ? blockcount : '-')
-          });
-        } else {
-          lib.get_hashrate(function(hashrate) {
-            db.get_stats(settings.coin.name, function (stats) {
-              lib.get_masternodecount(function(masternodestotal) {
-                lib.get_difficulty(function(difficulty) {
-                  difficultyHybrid = '';
+        return cb(connections, blockcount);
+      });
+    });
+  } else
+    return cb(null, null);
+}
 
-                  if (difficulty && difficulty['proof-of-work']) {
-                    if (settings.shared_pages.difficulty == 'Hybrid') {
-                      difficultyHybrid = 'POS: ' + difficulty['proof-of-stake'];
-                      difficulty = 'POW: ' + difficulty['proof-of-work'];
-                    } else if (settings.shared_pages.difficulty == 'POW')
-                      difficulty = difficulty['proof-of-work'];
-                    else
-                      difficulty = difficulty['proof-of-stake'];
+app.use('/ext/getsummary', function(req, res) {
+  const isInternal = (req.headers['x-requested-with'] != null && req.headers['x-requested-with'].toLowerCase() == 'xmlhttprequest' && req.headers.referer != null && req.headers.accept.indexOf('text/javascript') > -1 && req.headers.accept.indexOf('application/json') > -1);
+
+  // check if the getsummary api is enabled or else check the headers to see if it matches an internal ajax request from the explorer itself (TODO: come up with a more secure method of whitelisting ajax calls from the explorer)
+  if ((settings.api_page.enabled == true && settings.api_page.public_apis.ext.getsummary.enabled == true) || isInternal) {
+    // check if this is a footer-only method that should only return the connection count and block count
+    if (req.headers['footer-only'] != null && req.headers['footer-only'] == 'true') {
+      // only return the connection count and block count
+      get_connection_and_block_counts(true, function(connections, blockcount) {
+        res.send({
+          connections: (connections ? connections : '-'),
+          blockcount: (blockcount ? blockcount : '-')
+        });
+      });
+    } else {
+      // get the connection and block counts only if this is NOT an internal call
+      get_connection_and_block_counts(!isInternal, function(connections, blockcount) {
+        lib.get_hashrate(function(hashrate) {
+          db.get_stats(settings.coin.name, function (stats) {
+            lib.get_masternodecount(function(masternodestotal) {
+              lib.get_difficulty(function(difficulty) {
+                let difficultyHybrid = '';
+
+                if (difficulty && difficulty['proof-of-work']) {
+                  if (settings.shared_pages.difficulty == 'Hybrid') {
+                    difficultyHybrid = 'POS: ' + difficulty['proof-of-stake'];
+                    difficulty = 'POW: ' + difficulty['proof-of-work'];
+                  } else if (settings.shared_pages.difficulty == 'POW')
+                    difficulty = difficulty['proof-of-work'];
+                  else
+                    difficulty = difficulty['proof-of-stake'];
+                }
+
+                if (hashrate == 'There was an error. Check your console.')
+                  hashrate = 0;
+
+                let mn_total = 0;
+                let mn_enabled = 0;
+
+                // check if the masternode count api is enabled
+                if (settings.api_page.public_apis.rpc.getmasternodecount.enabled == true && settings.api_cmds['getmasternodecount'] != null && settings.api_cmds['getmasternodecount'] != '') {
+                  // masternode count api is available
+                  if (masternodestotal) {
+                    if (masternodestotal.total)
+                      mn_total = masternodestotal.total;
+
+                    if (masternodestotal.enabled)
+                      mn_enabled = masternodestotal.enabled;
                   }
+                }
 
-                  if (hashrate == 'There was an error. Check your console.')
-                    hashrate = 0;
-
-                  // check if the masternode count api is enabled
-                  if (settings.api_page.public_apis.rpc.getmasternodecount.enabled == true && settings.api_cmds['getmasternodecount'] != null && settings.api_cmds['getmasternodecount'] != '') {
-                    // masternode count api is available
-                    var mn_total = 0;
-                    var mn_enabled = 0;
-
-                    if (masternodestotal) {
-                      if (masternodestotal.total)
-                        mn_total = masternodestotal.total;
-
-                      if (masternodestotal.enabled)
-                        mn_enabled = masternodestotal.enabled;
-                    }
-
-                    res.send({
-                      difficulty: (difficulty ? difficulty : '-'),
-                      difficultyHybrid: difficultyHybrid,
-                      supply: (stats == null || stats.supply == null ? 0 : stats.supply),
-                      hashrate: hashrate,
-                      lastPrice: (stats == null || stats.last_price == null ? 0 : stats.last_price),
-                      connections: (connections ? connections : '-'),
-                      masternodeCountOnline: (masternodestotal ? mn_enabled : '-'),
-                      masternodeCountOffline: (masternodestotal ? Math.floor(mn_total - mn_enabled) : '-'),
-                      blockcount: (blockcount ? blockcount : '-')
-                    });
-                  } else {
-                    // masternode count api is not available
-                    res.send({
-                      difficulty: (difficulty ? difficulty : '-'),
-                      difficultyHybrid: difficultyHybrid,
-                      supply: (stats == null || stats.supply == null ? 0 : stats.supply),
-                      hashrate: hashrate,
-                      lastPrice: (stats == null || stats.last_price == null ? 0 : stats.last_price),
-                      connections: (connections ? connections : '-'),
-                      blockcount: (blockcount ? blockcount : '-')
-                    });
-                  }
+                res.send({
+                  difficulty: (difficulty ? difficulty : '-'),
+                  difficultyHybrid: difficultyHybrid,
+                  supply: (stats == null || stats.supply == null ? 0 : stats.supply),
+                  hashrate: hashrate,
+                  lastPrice: (stats == null || stats.last_price == null ? 0 : stats.last_price),
+                  lastUSDPrice: (stats == null || stats.last_usd_price == null ? 0 : stats.last_usd_price),
+                  connections: (connections ? connections : '-'),
+                  blockcount: (blockcount ? blockcount : '-'),
+                  masternodeCountOnline: (masternodestotal && mn_enabled != 0 ? mn_enabled : '-'),
+                  masternodeCountOffline: (masternodestotal && mn_total != 0 ? Math.floor(mn_total - mn_enabled) : '-')
                 });
               });
             });
           });
-        }
+        });
       });
-    });
+    }
   } else
     res.end('This method is disabled');
 });
@@ -602,6 +708,62 @@ app.use('/ext/getmasternoderewardstotal/:hash/:since', function(req, res) {
       } else
         res.send({error: "failed to retrieve masternode rewards", hash: req.params.hash, since: req.params.since});
     });
+  } else
+    res.end('This method is disabled');
+});
+
+// get the list of orphans from local collection
+app.use('/ext/getorphanlist/:start/:length', function(req, res) {
+  // check the headers to see if it matches an internal ajax request from the explorer itself (TODO: come up with a more secure method of whitelisting ajax calls from the explorer)
+  if (req.headers['x-requested-with'] != null && req.headers['x-requested-with'].toLowerCase() == 'xmlhttprequest' && req.headers.referer != null && req.headers.accept.indexOf('text/javascript') > -1 && req.headers.accept.indexOf('application/json') > -1) {
+    // fix parameters
+    if (typeof req.params.start === 'undefined' || isNaN(req.params.start) || req.params.start < 0)
+      req.params.start = 0;
+    if (typeof req.params.length === 'undefined' || isNaN(req.params.length))
+      req.params.length = 10;
+
+    // get the orphan list from local collection
+    db.get_orphans(req.params.start, req.params.length, function(orphans, count) {
+      var data = [];
+
+      for (i = 0; i < orphans.length; i++) {
+        var row = [];
+
+        row.push(orphans[i].blockindex);
+        row.push(orphans[i].orphan_blockhash);
+        row.push(orphans[i].good_blockhash);
+        row.push(orphans[i].prev_blockhash);
+        row.push(orphans[i].next_blockhash);
+
+        data.push(row);
+      }
+
+      // display data formatted for internal datatable
+      res.json({"data": data, "recordsTotal": count, "recordsFiltered": count});
+    });
+  } else
+    res.end('This method is disabled');
+});
+
+// get the last updated date for a particular section
+app.use('/ext/getlastupdated/:section', function(req, res) {
+  // check the headers to see if it matches an internal ajax request from the explorer itself (TODO: come up with a more secure method of whitelisting ajax calls from the explorer)
+  if (req.headers['x-requested-with'] != null && req.headers['x-requested-with'].toLowerCase() == 'xmlhttprequest' && req.headers.referer != null && req.headers.accept.indexOf('text/javascript') > -1 && req.headers.accept.indexOf('application/json') > -1) {
+    // fix parameters
+    if (req.params.section == null)
+      req.params.section = '';
+
+    switch (req.params.section.toLowerCase()) {
+      case 'blockchain':
+      case 'movement':
+        // lookup last updated date
+        db.get_stats(settings.coin.name, function (stats) {
+          res.json({'last_updated_date': stats.blockchain_last_updated});
+        });
+        break;
+      default:
+        res.send({error: 'Cannot find last updated date'});
+    }
   } else
     res.end('This method is disabled');
 });
@@ -702,9 +864,17 @@ if (settings.markets_page.enabled == true) {
       return 0;
   });
 
-  // Fix default exchange case
-  settings.markets_page.default_exchange.exchange_name = settings.markets_page.default_exchange.exchange_name.toLowerCase();
-  settings.markets_page.default_exchange.trading_pair = settings.markets_page.default_exchange.trading_pair.toUpperCase();
+  // fix default exchange name case
+  if (settings.markets_page.default_exchange.exchange_name != null)
+    settings.markets_page.default_exchange.exchange_name = settings.markets_page.default_exchange.exchange_name.toLowerCase();
+  else
+    settings.markets_page.default_exchange.exchange_name = '';
+
+  // fix default exchange trading pair case
+  if (settings.markets_page.default_exchange.trading_pair != null)
+    settings.markets_page.default_exchange.trading_pair = settings.markets_page.default_exchange.trading_pair.toUpperCase();
+  else
+    settings.markets_page.default_exchange.trading_pair = '';
 
   var ex = settings.markets_page.exchanges;
   var ex_name = settings.markets_page.default_exchange.exchange_name;
@@ -719,7 +889,7 @@ if (settings.markets_page.enabled == true) {
   } else if (!ex[ex_name].enabled) {
     // exchange is not enabled
     ex_error = 'Default exchange is disabled in settings' + ': ' + ex_name;
-  } else if (ex[ex_name].trading_pairs.findIndex(p => p.toLowerCase() == ex_pair.toLowerCase()) == -1) {
+  } else if (ex[ex_name].trading_pairs.findIndex(p => p.toUpperCase() == ex_pair.toUpperCase()) == -1) {
     // invalid default exchange trading pair
     ex_error = 'Default exchange trading pair is not valid' + ': ' + ex_pair;
   }
@@ -747,10 +917,10 @@ if (settings.markets_page.enabled == true) {
       settings.markets_page.enabled = false;
     } else {
       // a valid and enabled market was found to replace the default
-      console.log('WARNING: ' + ex_error + '. ' + 'Default exchange will be set to' + ': ' + ex_keys[new_default_index] + ' (' + ex[ex_keys[new_default_index]].trading_pairs[0] + ')');
+      console.log('WARNING: ' + ex_error + '. ' + 'Default exchange will be set to' + ': ' + ex_keys[new_default_index] + '[' + ex[ex_keys[new_default_index]].trading_pairs[0].toUpperCase() + ']');
       // set new default exchange data
       settings.markets_page.default_exchange.exchange_name = ex_keys[new_default_index];
-      settings.markets_page.default_exchange.trading_pair = ex[ex_keys[new_default_index]].trading_pairs[0];
+      settings.markets_page.default_exchange.trading_pair = ex[ex_keys[new_default_index]].trading_pairs[0].toUpperCase();
     }
   }
 }
@@ -780,7 +950,10 @@ app.set('richlist_page', settings.richlist_page);
 app.set('markets_page', settings.markets_page);
 app.set('api_page', settings.api_page);
 app.set('claim_address_page', settings.claim_address_page);
+app.set('orphans_page', settings.orphans_page);
+app.set('captcha', settings.captcha);
 app.set('labels', settings.labels);
+app.set('default_coingecko_ids', settings.default_coingecko_ids);
 app.set('api_cmds', settings.api_cmds);
 app.set('blockchain_specific', settings.blockchain_specific);
 
@@ -791,8 +964,13 @@ var panelcount = (settings.shared_pages.page_header.panels.network_panel.enabled
   (settings.shared_pages.page_header.panels.masternodes_panel.enabled == true && settings.shared_pages.page_header.panels.masternodes_panel.display_order > 0 ? 1 : 0) +
   (settings.shared_pages.page_header.panels.coin_supply_panel.enabled == true && settings.shared_pages.page_header.panels.coin_supply_panel.display_order > 0 ? 1 : 0) +
   (settings.shared_pages.page_header.panels.price_panel.enabled == true && settings.shared_pages.page_header.panels.price_panel.display_order > 0 ? 1 : 0) +
+  (settings.shared_pages.page_header.panels.usd_price_panel.enabled == true && settings.shared_pages.page_header.panels.usd_price_panel.display_order > 0 ? 1 : 0) +
   (settings.shared_pages.page_header.panels.market_cap_panel.enabled == true && settings.shared_pages.page_header.panels.market_cap_panel.display_order > 0 ? 1 : 0) +
-  (settings.shared_pages.page_header.panels.logo_panel.enabled == true && settings.shared_pages.page_header.panels.logo_panel.display_order > 0 ? 1 : 0);
+  (settings.shared_pages.page_header.panels.usd_market_cap_panel.enabled == true && settings.shared_pages.page_header.panels.usd_market_cap_panel.display_order > 0 ? 1 : 0) +
+  (settings.shared_pages.page_header.panels.logo_panel.enabled == true && settings.shared_pages.page_header.panels.logo_panel.display_order > 0 ? 1 : 0) +
+  (settings.shared_pages.page_header.panels.spacer_panel_1.enabled == true && settings.shared_pages.page_header.panels.spacer_panel_1.display_order > 0 ? 1 : 0) +
+  (settings.shared_pages.page_header.panels.spacer_panel_2.enabled == true && settings.shared_pages.page_header.panels.spacer_panel_2.display_order > 0 ? 1 : 0) +
+  (settings.shared_pages.page_header.panels.spacer_panel_3.enabled == true && settings.shared_pages.page_header.panels.spacer_panel_3.display_order > 0 ? 1 : 0);
 app.set('paneloffset', paneltotal + 1 - panelcount);
 
 // determine panel order
@@ -803,8 +981,13 @@ if (settings.shared_pages.page_header.panels.difficulty_panel.enabled == true &&
 if (settings.shared_pages.page_header.panels.masternodes_panel.enabled == true && settings.shared_pages.page_header.panels.masternodes_panel.display_order > 0) panel_order.push({name: 'masternodes_panel', val: settings.shared_pages.page_header.panels.masternodes_panel.display_order});
 if (settings.shared_pages.page_header.panels.coin_supply_panel.enabled == true && settings.shared_pages.page_header.panels.coin_supply_panel.display_order > 0) panel_order.push({name: 'coin_supply_panel', val: settings.shared_pages.page_header.panels.coin_supply_panel.display_order});
 if (settings.shared_pages.page_header.panels.price_panel.enabled == true && settings.shared_pages.page_header.panels.price_panel.display_order > 0) panel_order.push({name: 'price_panel', val: settings.shared_pages.page_header.panels.price_panel.display_order});
+if (settings.shared_pages.page_header.panels.usd_price_panel.enabled == true && settings.shared_pages.page_header.panels.usd_price_panel.display_order > 0) panel_order.push({name: 'usd_price_panel', val: settings.shared_pages.page_header.panels.usd_price_panel.display_order});
 if (settings.shared_pages.page_header.panels.market_cap_panel.enabled == true && settings.shared_pages.page_header.panels.market_cap_panel.display_order > 0) panel_order.push({name: 'market_cap_panel', val: settings.shared_pages.page_header.panels.market_cap_panel.display_order});
+if (settings.shared_pages.page_header.panels.usd_market_cap_panel.enabled == true && settings.shared_pages.page_header.panels.usd_market_cap_panel.display_order > 0) panel_order.push({name: 'usd_market_cap_panel', val: settings.shared_pages.page_header.panels.usd_market_cap_panel.display_order});
 if (settings.shared_pages.page_header.panels.logo_panel.enabled == true && settings.shared_pages.page_header.panels.logo_panel.display_order > 0) panel_order.push({name: 'logo_panel', val: settings.shared_pages.page_header.panels.logo_panel.display_order});
+if (settings.shared_pages.page_header.panels.spacer_panel_1.enabled == true && settings.shared_pages.page_header.panels.spacer_panel_1.display_order > 0) panel_order.push({name: 'spacer_panel_1', val: settings.shared_pages.page_header.panels.spacer_panel_1.display_order});
+if (settings.shared_pages.page_header.panels.spacer_panel_2.enabled == true && settings.shared_pages.page_header.panels.spacer_panel_2.display_order > 0) panel_order.push({name: 'spacer_panel_2', val: settings.shared_pages.page_header.panels.spacer_panel_2.display_order});
+if (settings.shared_pages.page_header.panels.spacer_panel_3.enabled == true && settings.shared_pages.page_header.panels.spacer_panel_3.display_order > 0) panel_order.push({name: 'spacer_panel_3', val: settings.shared_pages.page_header.panels.spacer_panel_3.display_order});
 
 panel_order.sort(function(a,b) { return a.val - b.val; });
 
@@ -821,42 +1004,51 @@ app.use(function(req, res, next) {
     next(err);
 });
 
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
-  });
-}
-
-// production error handler
-// no stacktraces leaked to user
+// error handler - will print stacktrace when in development mode, otherwise no stacktraces will be leaked to the user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
-    error: {}
+    error: (app.get('env') === 'development' ? err : {})
   });
 });
 
 // determine if tls features should be enabled
 if (settings.webserver.tls.enabled == true) {
+  function readCertsSync() {
+    var tls_options = {};
+
+    try {
+      tls_options = {
+        key: db.fs.readFileSync(settings.webserver.tls.key_file),
+        cert: db.fs.readFileSync(settings.webserver.tls.cert_file),
+        ca: db.fs.readFileSync(settings.webserver.tls.chain_file)
+      };
+    } catch(e) {
+      console.warn('There was a problem reading tls certificates. Check that the certificate, chain and key paths are correct.');
+    }
+
+    return tls_options;
+  }
+
+  const https = require('https');
+  let httpd = https.createServer(readCertsSync(), app).listen(settings.webserver.tls.port);
+
   try {
-    var tls_options = {
-      key: db.fs.readFileSync(settings.webserver.tls.key_file),
-      cert: db.fs.readFileSync(settings.webserver.tls.cert_file),
-      ca: db.fs.readFileSync(settings.webserver.tls.chain_file)
-    };
+    let waitForCertsToRefresh;
+
+    // watch for changes to the certificate directory
+    db.fs.watch(path.dirname(settings.webserver.tls.key_file), () => {
+      clearTimeout(waitForCertsToRefresh);
+
+      // refresh certificates as they are changed on disk
+      waitForCertsToRefresh = setTimeout(() => {
+        httpd.setSecureContext(readCertsSync());
+      }, 1000);
+    });
   } catch(e) {
     console.warn('There was a problem reading tls certificates. Check that the certificate, chain and key paths are correct.');
   }
-
-  var https = require('https');
-  https.createServer(tls_options, app).listen(settings.webserver.tls.port);
 }
 
 // get the latest git commit id (if exists)

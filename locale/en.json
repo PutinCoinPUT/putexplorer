@@ -1,55 +1,5 @@
 /* This file must be valid JSON. But comments are allowed */
 {
-  // menu items
-  "menu_explorer": "Explorer",
-  "menu_api": "API",
-  "menu_markets": "Markets",
-  "menu_richlist": "Top 100",
-  "menu_reward": "Reward",
-  "menu_movement": "Movement",
-  "menu_node": "Nodes",
-  "menu_network": "Network",
-  "menu_claim_address": "Claim Address",
-
-  // explorer view
-  "ex_title": "{1} Block Explorer",
-  "ex_description": "A listing of all verified {1} transactions",
-  "ex_search_title": "Search",
-  "ex_search_button": "Search",
-  "ex_search_message": "Search by block height, block hash, tx hash or address",
-  "ex_error": "Error!",
-  "ex_search_error": "Search found no results for: ",
-  "ex_latest_transactions": "Latest Transactions",
-  "ex_summary": "Block Summary",
-  "ex_supply": "Coin Supply",
-  "ex_block": "Block",
-
-  // transaction view
-  "tx_title": "{1} Transaction Details",
-  "tx_description": "Viewing tx data from {1} block # {2}",
-  "tx_block_hash": "Block Hash",
-  "tx_recipients": "Recipients",
-  "tx_contributors": "Input Addresses",
-  "tx_hash": "Hash",
-  "tx_address": "Address",
-  "tx_nonstandard": "NONSTANDARD TX",
-  "view_raw_tx_data": "View Raw Transaction Data",
-  "view_block": "View Block",
-
-  // block view
-  "block_title": "{1} Block Details",
-  "block_description": "Viewing block data from {1} block # {2}",
-  "block_previous": "Previous Block",
-  "block_next": "Next Block",
-  "block_genesis": "GENESIS",
-  "view_raw_block_data": "View Raw Block Data",
-  "view_tx": "View Transaction",
-
-  // error view
-  "error_title": "{1} Block Explorer Error",
-  "error_description": "The page you are looking for cannot be found",
-  "error_description_alt": "An error occurred which prevented the page from loading correctly",
-
   // global
   "difficulty": "Difficulty",
   "masternodecount": "Masternodes",
@@ -76,6 +26,58 @@
   "last_updated": "Last Updated",
   "initial_index_alert": "Blockchain data is currently being synchronized. You may browse the site during this time, but keep in mind that data may not yet be fully accurate and some functionality may not work until synchronization is complete.",
 
+  // menu items
+  "menu_explorer": "Explorer",
+  "menu_api": "API",
+  "menu_markets": "Markets",
+  "menu_richlist": "Top 100",
+  "menu_reward": "Reward",
+  "menu_movement": "Movement",
+  "menu_node": "Nodes",
+  "menu_network": "Network",
+  "menu_claim_address": "Claim Address",
+  "menu_orphans": "Orphaned Blocks",
+
+  // explorer view
+  "ex_title": "{1} Block Explorer",
+  "ex_description": "A listing of all verified {1} transactions",
+  "ex_search_title": "Search",
+  "ex_search_button": "Search",
+  "ex_search_message": "Search by block height, block hash, tx hash or address",
+  "ex_error": "Error",
+  "ex_warning": "Warning",
+  "ex_search_error": "Search found no results for: ",
+  "ex_latest_transactions": "Latest Transactions",
+  "ex_summary": "Block Summary",
+  "ex_supply": "Coin Supply",
+  "ex_block": "Block",
+
+  // transaction view
+  "tx_title": "{1} Transaction Details",
+  "tx_description": "Viewing tx data from {1} block # {2}",
+  "tx_block_hash": "Block Hash",
+  "tx_recipients": "Recipients",
+  "tx_contributors": "Input Addresses",
+  "tx_hash": "Tx Hash",
+  "tx_address": "Address",
+  "tx_nonstandard": "NONSTANDARD TX",
+  "view_raw_tx_data": "View Raw Transaction Data",
+  "view_block": "View Block",
+
+  // block view
+  "block_title": "{1} Block Details",
+  "block_description": "Viewing block data from {1} block # {2}",
+  "block_previous": "Previous Block",
+  "block_next": "Next Block",
+  "block_genesis": "GENESIS",
+  "view_raw_block_data": "View Raw Block Data",
+  "view_tx": "View Transaction",
+
+  // error view
+  "error_title": "{1} Block Explorer Error",
+  "error_description": "The page you are looking for cannot be found",
+  "error_description_alt": "An error occurred which prevented the page from loading correctly",
+
   // address view
   "a_title": "{1} Wallet Address Details",
   "a_description": "Viewing balance and transaction data from {1} address {2}",
@@ -93,7 +95,7 @@
   "move_title": "{1} Coin Movements",
   "move_description": "A listing of larger movements where {1} or more {2} coins were sent in a single transaction",
 
-  // richlist
+  // richlist view
   "rl_title": "Top {1} Coin Holders",
   "rl_description": "A listing of the richest {1} wallet addresses and breakdown of the current coin distribution",
   "rl_received_coins": "Top 100 - Received Coins",
@@ -107,6 +109,7 @@
   "rl_top100": "Top 76-100",
   "rl_hundredplus": "101+",
 
+  // network view
   "net_title": "{1} Network Peers",
   "net_description": "A listing of {1} network peers that have connected to the explorer node in the last 24 hours",
   "net_addnodes": "Add Nodes",
@@ -164,10 +167,21 @@
   "mkt_type": "Type",
   "mkt_time_stamp": "Time Stamp",
   "mkt_select": "Market Select",
+  "mkt_unexpected_api_data": "Received unexpected API data response",
 
   // claim address view
   "claim_title": "{1} Wallet Address Claim",
   "claim_description": "Verify ownership of your {1} wallet address and set a custom display name in the explorer",
+
+  // orphans view
+  "orphan_title": "{1} Orphaned Blocks",
+  "orphan_description": "A listing of valid blocks that have been orphaned and do not belong to the main blockchain",
+  "orphan_block_list": "Orphaned Block List",
+  "orphan_block_hash": "Orphaned Block Hash",
+  "orphan_actual_block": "Actual Block",
+  "orphan_prev_block": "Previous Block",
+  "orphan_next_block": "Next Block",
+  "view_orphan": "View Orphaned Block",
 
   // heavycoin rewards view
   "heavy_title": "{1} Reward/Voting Details",

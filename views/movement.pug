@@ -69,7 +69,7 @@ block content
           var amountStr = amountParts[0] + '.<span class="decimal">' + amountParts[1] + '</span>';
           var timestamp = data[5]; //variables for better readability
           var total = "<label class='badge bg-" + (amount > '#{settings.movement_page.movement_table.high_warning_flag}' ? 'danger' : (amount > '#{settings.movement_page.movement_table.low_warning_flag}' ? 'warning' : 'success')) + "' style='margin-bottom:0;'>" + amountStr + "</label>";
-          $("td:eq(0)", row).html('<a href="/tx/' + txhash + '"><span class="fa fa-eye" data-bs-toggle="tooltip" data-bs-placement="top" title="#{settings.locale.view_tx}"></span></a>').addClass('text-center d-table-cell d-md-none');
+          $("td:eq(0)", row).html('<a href="/tx/' + txhash + '"><span class="fa-regular fa-eye" data-bs-toggle="tooltip" data-bs-placement="top" title="#{settings.locale.view_tx}"></span></a>').addClass('text-center d-table-cell d-md-none');
           $("td:eq(1)", row).html('<a href="/tx/' + txhash + '">' + txhash + '</a>').addClass('breakWord d-none d-md-table-cell');
           $("td:eq(2)", row).html(total).addClass('text-center');
           $("td:eq(3)", row).html('<span' + (#{settings.shared_pages.date_time.enable_alt_timezone_tooltips} == true ? ' data-bs-toggle="tooltip" data-bs-placement="auto" title="' + format_unixtime(timestamp, true) + '"' : '') + '>' + format_unixtime(timestamp) + '</span>').addClass('text-center');
@@ -81,25 +81,39 @@ block content
         }
       });
 
-      var setting_reload_table_seconds = parseInt("#{settings.movement_page.movement_table.reload_table_seconds}");
-      if (setting_reload_table_seconds > 0) {
-        setInterval( function () {
-          rtable.api().ajax.reload(null, false);
-        }, (setting_reload_table_seconds * 1000) );
-      }
-
-      if ('#{settings.movement_page.page_header.show_last_updated}' == 'true') {
-        var lastUpdatedDate = #{(last_updated == null || last_updated == '0' ? 0 : last_updated)};
-
+      function update_last_updated(lastUpdatedDate) {
         if (lastUpdatedDate != 0) {
           $('span#lastUpdatedDate').html(' ' + format_unixtime(lastUpdatedDate));
 
           if (#{settings.shared_pages.date_time.enable_alt_timezone_tooltips} == true) {
-            $('span#lastUpdatedDate').attr('data-bs-toggle', 'tooltip').attr('data-bs-placement', 'auto').attr('title', format_unixtime(lastUpdatedDate, true));
+            $('span#lastUpdatedDate').attr('data-bs-toggle', 'tooltip').attr('data-bs-placement', 'auto').attr('title', format_unixtime(lastUpdatedDate, true)).attr('data-bs-original-title', format_unixtime(lastUpdatedDate, true));
             enableTooltips();
           }
         } else
           $('span#lastUpdatedDate').html(' N/A');
+      }
+
+      var setting_reload_table_seconds = parseInt("#{settings.movement_page.movement_table.reload_table_seconds}");
+      if (setting_reload_table_seconds > 0) {
+        setInterval(function () {
+          rtable.api().ajax.reload(null, false);
+        }, (setting_reload_table_seconds * 1000));
+
+        if ('#{settings.movement_page.page_header.show_last_updated}' == 'true') {
+          setInterval(function () {
+            $.ajax({url: '/ext/getlastupdated/movement', headers: { Accept: 'application/json, text/javascript, */*; q=0.01' }, success: function(json) {
+              if (json != null && json.last_updated_date != null)
+                update_last_updated(json.last_updated_date);
+              else
+                update_last_updated(0);
+            }});
+          }, (setting_reload_table_seconds * 1000));
+        }
+      }
+
+      if ('#{settings.movement_page.page_header.show_last_updated}' == 'true') {
+        var lastUpdatedDate = #{(last_updated == null || last_updated == '0' ? 0 : last_updated)};
+        update_last_updated(lastUpdatedDate);
       }
       if (#{settings.shared_pages.page_header.page_title_image.enable_animation} == true && #{settings.movement_page.page_header.show_img} == true)
         startRotateElement('img#header-img');

@@ -10,9 +10,9 @@
   // dbsettings: a collection of settings that allow the explorer to connect to MongoDB
   "dbsettings": {
     // user: The MongoDB username
-    "user": "setdbuser",
+    "user": "setdbuserhere",
     // password: The MongoDB password
-    "password": "setpassword",
+    "password": "setdbpasswordhere",
     // database: The MongoDB database name (default: explorerdb)
     "database": "explorerdb",
     // address: The MongoDB hostname. This should always be 'localhost' if connecting to a local instance, otherwise specify the ip address of a remote instance
@@ -28,9 +28,9 @@
     // port: The port # that the wallet is configured to listen for RPC requests on (default: 51573 for Exor wallet)
     "port": 51573,
     // username: The wallet RPC username
-    "username": "exorrpc",
+    "username": "setthewalletrpcusernamehere",
     // password: The wallet RPC password
-    "password": "sSTLyCkrD94Y8&9mr^m6W^Mk367Vr!!K"
+    "password": "setthewalletrpcpasswordhere"
   },
 
   // webserver: a collection of settings that pertain to the node.js express web framework (read more: https://www.npmjs.com/package/express)

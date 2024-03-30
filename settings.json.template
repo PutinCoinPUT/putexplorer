@@ -15,7 +15,7 @@
     "password": "setdbpasswordhere",
     // database: The MongoDB database name (default: explorerdb)
     "database": "explorerdb",
-    // address: The MongoDB hostname. This should always be 'localhost' if connecting to a local instance, otherwise specify the ip address of a remote instance
+    // address: The MongoDB hostname. This should always be 'localhost' if connecting to a local instance, otherwise specify the IP address of a remote instance
     "address": "localhost",
     // port: The port # that MongoDB is configured to listen for requests on (default: 27017)
     "port": 27017
@@ -23,7 +23,7 @@
 
   // wallet: a collection of settings that allow the explorer to connect to the coin wallet
   "wallet": {
-    // host: The hostname or ip address of the wallet to connect to (default: localhost)
+    // host: The hostname or IP address of the wallet to connect to (default: localhost)
     "host": "localhost",
     // port: The port # that the wallet is configured to listen for RPC requests on (default: 51573 for Exor wallet)
     "port": 51573,
